@@ -1,12 +1,33 @@
 
 
-var H = 1.0; // this is the smoothness constant higher == smoother
+var H = 1.5; // this is the smoothness constant higher == smoother need some sort of keyboard control
+
+
+// print heights to console [useless for large grids]
+function gridToConsole(grid)
+{
+	var str = "";
+	var gridSize = grid.length;
+	
+	for(var i = 0; i < gridSize; i++)
+	{
+		for(var k = 0; k < gridSize; k++)
+		{
+			str += Math.round(grid[i][k]) + "\t";
+		}
+		console.log(str);
+		console.log();
+		str = "";
+	}
+}
+
 
 function Coordinate (x, y)
 {
 	this.x = x;
 	this.y = y;
 }
+
 
 
 /* Potentially replace both of the height calculation functions   - NOT CURRENTLY USED - */
@@ -26,6 +47,8 @@ function variedAverage (grid, variation_scale, values)
 	
 	return avg + (random * variation_scale);
 }
+
+/* */
 
 
 
@@ -101,35 +124,34 @@ function generateHeights (bottom_left, side_length, scale, grid)
 function main()
 {
 	var i, k;
-	var gridSize = 17;
+	var gridSize = 17;  /* Assign grid size here */
 	
 	var start = new Coordinate(0, 0);
 	
-	// create a grid
+	/* create a grid */
 	var Grid = new Array(gridSize);
 	for(i = 0; i < gridSize; i++)
 	{
 		Grid[i] = new Array(gridSize)
 	}
-	console.log("hello");
-	Grid[0][0] = 100;
-	Grid[0][gridSize-1] = 10;
+	
+	/* Assign inital corner values. Should be randomly generated */
+	Grid[0][0] = 0;
+	Grid[0][gridSize-1] = 0;
 	Grid[gridSize-1][0] = 0;
-	Grid[gridSize-1][gridSize-1] = 50;
+	Grid[gridSize-1][gridSize-1] = 0;
 	
-	generateHeights (start, (gridSize - 1), 25, Grid);  // 25 = maxHeight / 4
+	/* 2.5 = maxHeight / 4 */
+	generateHeights (start, (gridSize - 1), gridSize/3, Grid);  
 	
-	var str = "";
+	gridToConsole(Grid);
 	
-	for(i = 0; i < gridSize; i++)
-	{
-		for(k = 0; k < gridSize; k++)
-		{
-			str += Math.round(Grid[i][k]) + "\t";
-		}
-		console.log(str);
-		console.log();
-		str = "";
-	}
+	// prepare data for use by Three.js
+	var geometry = prepareData(Grid);
+	// render!
+	render(geometry);
+	
 
 }
+
+
