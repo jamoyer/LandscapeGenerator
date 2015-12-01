@@ -18,23 +18,41 @@ function prepareData(Grid) {
 	{
 		for(var z = 0; z < gridSize - 1; z++)
 		{
-			/* add vertices for the lower-right triangle */
+			/* add vertices for the lower-right triangle 
 			geometry.vertices.push( new THREE.Vector3( x, waterLevel(Grid[x][z]), z ),	
 									new THREE.Vector3( x+1, waterLevel(Grid[x+1][z]), z ), 					
 									new THREE.Vector3( x+1, waterLevel(Grid[x+1][z+1]), z+1 ) );
-								
+			*/
+			geometry.vertices.push( new THREE.Vector3( x, waterLevel(Grid[x][z]), z ) );
+			geometry.colors.push(getColor(Grid[x][z]));	
+			geometry.vertices.push( new THREE.Vector3( x+1, waterLevel(Grid[x+1][z]), z ) );
+			geometry.colors.push(getColor(Grid[x+1][z]));						
+			geometry.vertices.push( new THREE.Vector3( x+1, waterLevel(Grid[x+1][z+1]), z+1 ) );
+			geometry.colors.push(getColor(Grid[x+1][z+1]));	
 							
 			
 			/* add vertices for the upper-left triangle [pretty sure we need CCW coordinate order] */
-			geometry.vertices.push( new THREE.Vector3( x, waterLevel(Grid[x][z]), z ),						
-									new THREE.Vector3( x+1, waterLevel(Grid[x+1][z+1]), z+1 ),				
-									new THREE.Vector3( x, waterLevel(Grid[x][z+1]), z+1 )  );					
+			geometry.vertices.push( new THREE.Vector3( x, waterLevel(Grid[x][z]), z ) );	
+			geometry.colors.push(getColor(Grid[x][z]));											
+			geometry.vertices.push( new THREE.Vector3( x+1, waterLevel(Grid[x+1][z+1]), z+1 ) );	
+			geometry.colors.push(getColor(Grid[x+1][z+1]));									
+			geometry.vertices.push( new THREE.Vector3( x, waterLevel(Grid[x][z+1]), z+1 )  );
+			geometry.colors.push(getColor(Grid[x][z+1]));									
 						
 			/* push face for lower-right triangle */
-			geometry.faces.push( new THREE.Face3( numVertices+0, numVertices+1, numVertices+2 ) );
+			var f1 = new THREE.Face3(numVertices+0, numVertices+1, numVertices+2);
+			f1.vertexColors.push(geometry.colors[numVertices + 0]);
+			f1.vertexColors.push(geometry.colors[numVertices + 1]);
+			f1.vertexColors.push(geometry.colors[numVertices + 2]);
+			
+			geometry.faces.push( f1 );
 				
 			/* push face for upper-left triangle */
-			geometry.faces.push( new THREE.Face3( numVertices+3, numVertices+4, numVertices+5 ) );
+			var f2 = new THREE.Face3(numVertices+3, numVertices+4, numVertices+5 );
+			f2.vertexColors.push(geometry.colors[numVertices + 3]);
+			f2.vertexColors.push(geometry.colors[numVertices + 4]);
+			f2.vertexColors.push(geometry.colors[numVertices + 5]);
+			geometry.faces.push( f2 );
 							
 			/* update the number of vertices that we have added once faces have been created */
 			numVertices += 6;
@@ -57,35 +75,77 @@ function prepareData(Grid) {
 
 
 function waterLevel(height){
-	if(height < -5)
+
+	if(height < 0)
 	{
-		return -5;
+		return 0;
 	}
 	return height;
 }
 
+function getColor(height)
+{
+	var water_color = new THREE.Color(0x129793);
+	var grass_color = new THREE.Color(0x007B0C);
+	var sand_color = new THREE.Color(0xc2b280);
+	var stone_color = new THREE.Color(0x444250);
+	
+	
+	var rand = Math.abs(randomNormal(1, .44)) * height;
+	if (rand < 0)
+	{
+		return water_color;
+	}
+	if(rand < 20)
+	{
+		return sand_color;
+	}
+	if(rand < 80)
+	{
+		return grass_color;
+	}
+	return stone_color
+	
+}
+
+
 
 
 /* --Render-- */
-function render(geometry, scale) {
+function render(geometry, size) {
 	/* create the scene object */
 	var scene = new THREE.Scene();
 	
 	/* create a camera looking at origin */
   	camera = new THREE.PerspectiveCamera( 45, 1.5, 0.1, 1000 );
-  	camera.position.x = 17;
-  	camera.position.y = 17;
-  	camera.position.z = 25;
-  	camera.lookAt(new THREE.Vector3(9, 0, 9));
+  	camera.position.x = 2;
+  	camera.position.y = 3;
+  	camera.position.z = 2;
+  	camera.lookAt(new THREE.Vector3(0, 0, 0));
   
   	/* create a renderer for the canvas */
   	var ourCanvas = document.getElementById('theCanvas');
   	var renderer = new THREE.WebGLRenderer({canvas: ourCanvas});
 	  
 	/* create a mesh from geometry object */  					 			
-	var material = new THREE.MeshPhongMaterial( {wireframe: false, color:0x444250, specular: 0xffffff, shininess: 1, side: THREE.DoubleSide }  );
+	var material = new THREE.MeshPhongMaterial( {vertexColors: THREE.VertexColors, wireframe: false, specular: 0xffffff, shininess: 1, side: THREE.DoubleSide }  );
 	var mesh = new THREE.Mesh(geometry, material);
+	var scale =  1 / size;
 	mesh.scale.set(scale, scale, scale);
+	mesh.position.set(-0.5, 0, -0.5);
+	
+	
+	
+	/* Create Water /
+	geometry = new THREE.BoxGeometry(1,.5,1);
+	geometry.translate(0, -0.5, 0);
+	//geometry.rotateX(Math.PI / 2);
+	material = new THREE.MeshBasicMaterial( {vertexColors: THREE.VertexColors, side: THREE.DoubleSide} );
+	var water = new THREE.Mesh(geometry, material);
+	//water_surface.position.set(-.5, 0, -.5);
+	*/
+	
+	
 	/* create lights */
 	//var lights = new THREE.Group();
 	
@@ -99,6 +159,7 @@ function render(geometry, scale) {
 	scene.add(ambient);
 	scene.add(sun);
 	scene.add(mesh);
+	//scene.add(water);
 	
 	var x = 0;
 	
@@ -154,28 +215,28 @@ function cameraControl(c, ch)
   	{
 		/* movement in plane */
 		case 'w':
-			c.translateZ(-0.5);
+			c.translateZ(-0.1);
 			return true;
 		case 'a':
-			c.translateX(-0.5);
+			c.translateX(-0.1);
 			return true;
 		case 's':
-			c.translateZ(0.5);
+			c.translateZ(0.1);
 			return true;
 		case 'd':
-			c.translateX(0.5);
+			c.translateX(0.1);
 			return true;
 		case 'W':
-			c.translateZ(-2);
+			c.translateZ(-.5);
 			return true;
 		case 'A':
-			c.translateX(-2);
+			c.translateX(-.5);
 			return true;
 		case 'S':
-			c.translateZ(2);
+			c.translateZ(.5);
 			return true;
 		case 'D':
-			c.translateX(2);
+			c.translateX(.5);
 			return true;
 			
 		/* move up-down */

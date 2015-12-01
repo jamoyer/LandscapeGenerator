@@ -15,8 +15,7 @@ function gridToConsole(grid)
 		{
 			str += Math.round(grid[i][k]) + "\t";
 		}
-		console.log(str);
-		console.log();
+
 		str = "";
 	}
 }
@@ -35,16 +34,31 @@ function variedAverage (grid, variation_scale, values)
 {
 	var i;
 	var sum = 0.0;
+	var distance = Math.max(Math.abs(values[0].x - values[1].x), Math.abs(values[0].y - values[1].y));
+	var max = 0;
+	var min = 1000;
 	
 	for (i = 0; i < values.length; i ++)
 	{
 		sum += grid [values[i].x] [values[i].y];
+		if (grid [values[i].x] [values[i].y] > max)	{ max = grid [values[i].x] [values[i].y]}  
+		if (grid [values[i].x] [values[i].y] < min)	{ min = grid [values[i].x] [values[i].y]}  
 	}
 	
+//Just fucking around with some values to make mountains rougher and lower areas smoother 
+	var slope = (max - min)/ distance;
 	var avg = sum / values.length;
 	
-	var random = randomNormal(0, .33333333);
+	var random = randomNormal(0, .33);
+	
+	var height_ratio = avg / (grid.length *.25);
+	height_ratio = Math.min(height_ratio, .76);
 
+	variation_scale = (variation_scale + slope) * height_ratio ;
+
+	/* greater slope between points greater variation */
+	
+	
 	return avg + (random * variation_scale);
 }
 /* */
@@ -95,7 +109,6 @@ function generateHeights (bottom_left, side_length, scale, grid)
 	var top_right 	 = new Coordinate (bottom_left.x + side_length, bottom_left.y + side_length);
 	var bottom_right = new Coordinate (bottom_left.x + side_length, bottom_left.y);
 	
-	console.log("start: (" + bottom_left.x + ", " + bottom_left.y + ")\twidth: " + (bottom_right.x - bottom_left.x) + "\theight: " + (top_right.y - bottom_right.y));
 	
 	/* Create Coordinates to reference edge and center pionts */
 	var left_edge 	=  new Coordinate (bottom_left.x, 				bottom_left.y + half_length);
@@ -185,7 +198,7 @@ function main()
 {
 	window.onkeypress = handleKeyPress;
 	var i;
-	var steps = 9;  /* Assign grid size here can handle up to 10 reasonably well */
+	var steps = 9;  /* Assign grid size here can handle up to 9 reasonably well  10 takes like 30 seconds, but loks great*/
 	var gridSize = 2;  
 		
 	for(i = 0; i < steps; i ++)
@@ -206,10 +219,10 @@ function main()
 	}
 	
 	/* Assign inital corner values. Should be randomly generated */
-	Grid[0][0] = randomNormal(0, gridSize);
-	Grid[0][gridSize-1] = randomNormal(0, gridSize/5);
-	Grid[gridSize-1][0] = randomNormal(0, gridSize/5);
-	Grid[gridSize-1][gridSize-1] = randomNormal(0, gridSize/5);
+	Grid[0][0] = Math.abs(randomNormal(0, gridSize/4));
+	Grid[0][gridSize-1] = Math.abs(randomNormal(0, gridSize/4));
+	Grid[gridSize-1][0] = randomNormal(0, gridSize/16);
+	Grid[gridSize-1][gridSize-1] = randomNormal(0, gridSize/16);
 	
 	/* 2.5 = maxHeight / 4 */
 	BFHeights (start, (gridSize - 1), gridSize / 2, Grid, steps);  
@@ -219,7 +232,7 @@ function main()
 	// prepare data for use by Three.js
 	var geometry = prepareData(Grid);
 	// render!
-	render(geometry, (1 / Math.pow(steps, 2)));
+	render(geometry, gridSize);
 	
 
 }
