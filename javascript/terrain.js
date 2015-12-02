@@ -1,6 +1,6 @@
 
 
-var H = 2.0; // this is the smoothness constant higher == smoother need some sort of keyboard control
+var H = 1.8; // this is the smoothness constant higher == smoother need some sort of keyboard control
 
 
 // print heights to console [useless for large grids]
@@ -44,19 +44,18 @@ function variedAverage (grid, variation_scale, values)
 		if (grid [values[i].x] [values[i].y] > max)	{ max = grid [values[i].x] [values[i].y]}  
 		if (grid [values[i].x] [values[i].y] < min)	{ min = grid [values[i].x] [values[i].y]}  
 	}
-	
-//Just fucking around with some values to make mountains rougher and lower areas smoother 
-	var slope = (max - min)/ distance;
+
+	var random = randomNormal(0, .33);
 	var avg = sum / values.length;
 	
-	var random = randomNormal(0, .33);
+	var height_ratio = (avg + grid.length / 2) / grid.length;
+	if(height_ratio > .9)
+	{
+		height_ratio = 1;
+	}
 	
-	var height_ratio = avg / (grid.length *.25);
-	height_ratio = Math.min(height_ratio, .76);
+	variation_scale = (variation_scale) * height_ratio;
 
-	variation_scale = (variation_scale + slope) * height_ratio ;
-
-	/* greater slope between points greater variation */
 	
 	
 	return avg + (random * variation_scale);
@@ -191,6 +190,10 @@ function BFHeights(start, grid_length, scale, grid, steps)
 
 
 
+function generate()
+{
+	main();
+}	
 
 
 
@@ -219,15 +222,16 @@ function main()
 	}
 	
 	/* Assign inital corner values. Should be randomly generated */
-	Grid[0][0] = Math.abs(randomNormal(0, gridSize/4));
-	Grid[0][gridSize-1] = Math.abs(randomNormal(0, gridSize/4));
-	Grid[gridSize-1][0] = randomNormal(0, gridSize/16);
-	Grid[gridSize-1][gridSize-1] = randomNormal(0, gridSize/16);
+	Grid[0][0] = randomNormal(10, gridSize/4);
+	Grid[0][gridSize-1] =randomNormal(10, gridSize/4);
+	Grid[gridSize-1][0] = randomNormal(10, gridSize/16);
+	Grid[gridSize-1][gridSize-1] = randomNormal(10, gridSize/16);
 	
 	/* 2.5 = maxHeight / 4 */
 	BFHeights (start, (gridSize - 1), gridSize / 2, Grid, steps);  
+	//generateHeights(start, (gridSize - 1), gridSize / 2, Grid, steps);  
 	
-	gridToConsole(Grid);
+	//gridToConsole(Grid);
 	
 	// prepare data for use by Three.js
 	var geometry = prepareData(Grid);

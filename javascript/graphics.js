@@ -78,7 +78,7 @@ function waterLevel(height){
 
 	if(height < 0)
 	{
-		return 0;
+		return height;
 	}
 	return height;
 }
@@ -91,12 +91,12 @@ function getColor(height)
 	var stone_color = new THREE.Color(0x444250);
 	
 	
-	var rand = Math.abs(randomNormal(1, .44)) * height;
+	var rand = Math.abs(randomNormal(1, .15)) * height;
 	if (rand < 0)
 	{
 		return water_color;
 	}
-	if(rand < 20)
+	if(rand < 10)
 	{
 		return sand_color;
 	}
@@ -128,7 +128,7 @@ function render(geometry, size) {
   	var renderer = new THREE.WebGLRenderer({canvas: ourCanvas});
 	  
 	/* create a mesh from geometry object */  					 			
-	var material = new THREE.MeshPhongMaterial( {vertexColors: THREE.VertexColors, wireframe: false, specular: 0xffffff, shininess: 1, side: THREE.DoubleSide }  );
+	var material = new THREE.MeshPhongMaterial( {vertexColors: THREE.VertexColors, wireframe: false, specular: 0x888888, shininess: 1, side: THREE.DoubleSide }  );
 	var mesh = new THREE.Mesh(geometry, material);
 	var scale =  1 / size;
 	mesh.scale.set(scale, scale, scale);
@@ -136,14 +136,14 @@ function render(geometry, size) {
 	
 	
 	
-	/* Create Water /
-	geometry = new THREE.BoxGeometry(1,.5,1);
-	geometry.translate(0, -0.5, 0);
-	//geometry.rotateX(Math.PI / 2);
-	material = new THREE.MeshBasicMaterial( {vertexColors: THREE.VertexColors, side: THREE.DoubleSide} );
+	// Create Water 
+	geometry = new THREE.PlaneGeometry(1,1);
+	geometry.translate(0, 0, 0);
+	geometry.rotateX(Math.PI / 2);
+	material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.4, color: 0x0077be, side: THREE.DoubleSide} );
 	var water = new THREE.Mesh(geometry, material);
-	//water_surface.position.set(-.5, 0, -.5);
-	*/
+	//water.position.set(-.5, 0, -.5);
+	
 	
 	
 	/* create lights */
@@ -159,7 +159,7 @@ function render(geometry, size) {
 	scene.add(ambient);
 	scene.add(sun);
 	scene.add(mesh);
-	//scene.add(water);
+	scene.add(water);
 	
 	var x = 0;
 	
