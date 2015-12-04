@@ -83,7 +83,8 @@ Rng.prototype.testRandom = function() {
 }
 
 //var RNG_INSTANCE = new Rng(1243378558); // creates an epic mountain
-var RNG_INSTANCE = new Rng(12438568); // creates a map with a balance of mountains, grass, and water
+//var RNG_INSTANCE = new Rng(12438568); // creates a map with a balance of mountains, grass, and water
+var RNG_INSTANCE = new Rng();
 
 /* ========================================================================
  * Returns a normal (Gaussian) distributed real number.
