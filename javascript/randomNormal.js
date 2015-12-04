@@ -31,8 +31,9 @@
 
 var MODULUS = 2147483647; // DON'T CHANGE THIS VALUE
 function Rng(seed) {
-    // Rng is either seeded with something or we choose a random starting seed
-    this.seed = seed || Math.max(Math.ceil(Math.random() * (MODULUS - 1)), 1);
+    // Rng is either seeded with something or use the current time
+    // Mod time by MODULUS to make sure it doesnt go over
+    this.seed = seed || Math.max(Date.now() % MODULUS, 1);
 }
 
 Rng.prototype.MODULUS      = MODULUS;

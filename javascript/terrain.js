@@ -164,42 +164,33 @@ function BFHeights(start, grid_length, scale, grid, steps)
         for(var k = 0; k < side_lengths_at_level; k++){
 
             for(var j = 0; j < side_lengths_at_level; j++){
-                bottom_left  = new Coordinate (start.x + (side_length * k), start.y + (side_length * j))
-                top_left      = new Coordinate (bottom_left.x, bottom_left.y + side_length);
-                top_right      = new Coordinate (bottom_left.x + side_length, bottom_left.y + side_length);
+                bottom_left  = new Coordinate (start.x + (side_length * k), start.y + (side_length * j));
+                top_left     = new Coordinate (bottom_left.x,               bottom_left.y + side_length);
+                top_right    = new Coordinate (bottom_left.x + side_length, bottom_left.y + side_length);
                 bottom_right = new Coordinate (bottom_left.x + side_length, bottom_left.y);
 
-                left_edge     =  new Coordinate (bottom_left.x,                 bottom_left.y + half_length);
-                right_edge     =  new Coordinate (bottom_left.x + side_length, bottom_left.y + half_length);
-                bottom_edge    =  new Coordinate (bottom_left.x + half_length, bottom_left.y);
-                top_edge     =  new Coordinate (bottom_left.x + half_length, bottom_left.y + side_length);
-                center         =  new Coordinate (bottom_left.x + half_length, bottom_left.y + half_length);
+                left_edge    = new Coordinate (bottom_left.x,               bottom_left.y + half_length);
+                right_edge   = new Coordinate (bottom_left.x + side_length, bottom_left.y + half_length);
+                bottom_edge  = new Coordinate (bottom_left.x + half_length, bottom_left.y);
+                top_edge     = new Coordinate (bottom_left.x + half_length, bottom_left.y + side_length);
+                center       = new Coordinate (bottom_left.x + half_length, bottom_left.y + half_length);
 
                 /* Assign values of edge points */
-                grid [left_edge.x] [left_edge.y]      =    variedAverage (grid, scale, [bottom_left, top_left]);
-                grid [right_edge.x] [right_edge.y]      =     variedAverage (grid, scale, [bottom_right, top_right]);
-                grid [top_edge.x] [top_edge.y]          =     variedAverage (grid, scale, [top_left, top_right]);
-                grid [bottom_edge.x] [bottom_edge.y] =    variedAverage (grid, scale, [bottom_left, bottom_right]);
+                grid [left_edge.x] [left_edge.y]     = variedAverage (grid, scale, [bottom_left, top_left]);
+                grid [right_edge.x] [right_edge.y]   = variedAverage (grid, scale, [bottom_right, top_right]);
+                grid [top_edge.x] [top_edge.y]       = variedAverage (grid, scale, [top_left, top_right]);
+                grid [bottom_edge.x] [bottom_edge.y] = variedAverage (grid, scale, [bottom_left, bottom_right]);
 
                 grid [center.x] [center.y] = variedAverage (grid, scale, [bottom_left, top_left, top_right, bottom_right]);
             }
-
         }
     }
-
 }
-
-
-
-
-
 
 function generate()
 {
     main();
 }
-
-
 
 function main()
 {
