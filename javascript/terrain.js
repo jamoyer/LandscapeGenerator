@@ -60,6 +60,9 @@ function variedAverage (grid, variation_scale, values)
     }
     else
     {
+        // scaling equation
+        // source: https://docs.google.com/a/iastate.edu/spreadsheets/d/1Ra9ffuAv2Db9lx1uYCne1lHRfD4ETJUAm6id9wkY7jI/edit?usp=sharing
+        // height_scale = 3.366*height_level^3 - 1.952*height_level^2 + 0.353*height_level + 0.248
         height_scale = (((3.366 * height_level) - 1.952) * height_level + 0.353) * height_level + 0.248;
     }
 

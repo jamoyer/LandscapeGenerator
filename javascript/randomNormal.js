@@ -29,13 +29,13 @@
  * -------------------------------------------------------------------------
  */
 
-var MODULUS = 2147483647;
+var MODULUS = 2147483647; // DON'T CHANGE THIS VALUE
 function Rng(seed) {
     // Rng is either seeded with something or we choose a random starting seed
     this.seed = seed || Math.max(Math.ceil(Math.random() * (MODULUS - 1)), 1);
 }
 
-Rng.prototype.MODULUS      = MODULUS;   /* DON'T CHANGE THIS VALUE                   */
+Rng.prototype.MODULUS      = MODULUS;
 Rng.prototype.MULTIPLIER   = 48271;     /* use 16807 for the "minimal standard"      */
 Rng.prototype.CHECK        = 399268537; /* use 1043616065 for the "minimal standard" */
 
