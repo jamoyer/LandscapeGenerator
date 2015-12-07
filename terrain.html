@@ -2,22 +2,31 @@
     <head>
         <title>Landscape Generation</title>
     </head>
-    <div class="container">
-        <canvas id="theCanvas" width="900" height="600">
-            Please use a browser that supports "canvas"
-        </canvas>
-        <div class="controls">
-            <div class="active">
-                <!-- Controls for things like sun that don't need a rebuild of terrain -->
+    <body>
+        <div class="container">
+            <canvas id="theCanvas" width="900" height="600">
+                Please use a browser that supports "canvas"
+            </canvas>
+            <div class="controls">
+                <div class="active">
+                    <!-- Controls for things like sun that don't need a rebuild of terrain -->
+                </div>
+                <form onsubmit="main()">
+                    <label for="smoothness">Smoothness</label>
+                    <input type="range" id="smoothness" min="1.0" value="2.3" max="3.0" step="100">
+
+                    <input type="submit" value="submit">
+                </form>
             </div>
-            <form onsubmit="generate()">
-                <label for="smoothness">Smoothness</label>
-                <input type="range" id="smoothness" min="1.0" value="2.3" max="3.0" step="100">
-                
-                <input type="submit" value="submit">
-            </form>
+            <div>
+                <ul>
+                    <li>w,a,s,d -> Move camera forward, left, backward, right.</li>
+                    <li>i,j,k,l -> Look up, left, down, right.</li>
+                    <li>I,J,K,L -> Orbit camera up, right, down, left.</li>
+                </ul>
+            </div>
         </div>
-    </div>
+    </body>
     <!--<script src="http://threejs.org/build/three.min.js"></script>-->
     <script src ="javascript/threejs/three.min.js"></script>
     <script src ="javascript/coordinate.js"></script>

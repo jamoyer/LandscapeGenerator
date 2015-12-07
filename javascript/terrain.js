@@ -142,7 +142,6 @@ function generateHeights (bottom_left, side_length, scale, grid)
 };
 
 
-
 function BFHeights(start, grid_length, scale, grid, steps)
 {
 
@@ -162,78 +161,161 @@ function BFHeights(start, grid_length, scale, grid, steps)
         half_length = side_length / 2;
 
         for(var k = 0; k < side_lengths_at_level; k++){
-
             for(var j = 0; j < side_lengths_at_level; j++){
+                // get the 4 points bounding this chunk
                 bottom_left  = new Coordinate (start.x + (side_length * k), start.y + (side_length * j));
                 top_left     = new Coordinate (bottom_left.x,               bottom_left.y + side_length);
                 top_right    = new Coordinate (bottom_left.x + side_length, bottom_left.y + side_length);
                 bottom_right = new Coordinate (bottom_left.x + side_length, bottom_left.y);
 
+                // get the center points of all the sides of this chunk and the exact center point itself
                 left_edge    = new Coordinate (bottom_left.x,               bottom_left.y + half_length);
                 right_edge   = new Coordinate (bottom_left.x + side_length, bottom_left.y + half_length);
                 bottom_edge  = new Coordinate (bottom_left.x + half_length, bottom_left.y);
                 top_edge     = new Coordinate (bottom_left.x + half_length, bottom_left.y + side_length);
                 center       = new Coordinate (bottom_left.x + half_length, bottom_left.y + half_length);
 
-                /* Assign values of edge points */
-                grid [left_edge.x] [left_edge.y]     = variedAverage (grid, scale, [bottom_left, top_left]);
-                grid [right_edge.x] [right_edge.y]   = variedAverage (grid, scale, [bottom_right, top_right]);
-                grid [top_edge.x] [top_edge.y]       = variedAverage (grid, scale, [top_left, top_right]);
-                grid [bottom_edge.x] [bottom_edge.y] = variedAverage (grid, scale, [bottom_left, bottom_right]);
-
-                grid [center.x] [center.y] = variedAverage (grid, scale, [bottom_left, top_left, top_right, bottom_right]);
+                // Assign values to all side centers and the actual center
+                // Do not assign values if a value already exists, which happens when this is a border with a neighbor grid
+                grid [left_edge.x] [left_edge.y]     = grid [left_edge.x] [left_edge.y]     || variedAverage (grid, scale, [bottom_left, top_left]);
+                grid [right_edge.x] [right_edge.y]   = grid [right_edge.x] [right_edge.y]   || variedAverage (grid, scale, [bottom_right, top_right]);
+                grid [top_edge.x] [top_edge.y]       = grid [top_edge.x] [top_edge.y]       || variedAverage (grid, scale, [top_left, top_right]);
+                grid [bottom_edge.x] [bottom_edge.y] = grid [bottom_edge.x] [bottom_edge.y] || variedAverage (grid, scale, [bottom_left, bottom_right]);
+                grid [center.x] [center.y]           =  variedAverage (grid, scale, [bottom_left, top_left, top_right, bottom_right]);
             }
         }
+
+        // I don't think this has the effect of smoothing like we thought it might.
+        // Rescale each point on the grid slightly to remove the grid-like appearance
+/*        for(var k = 0; k < side_lengths_at_level; k++){
+            for(var j = 0; j < side_lengths_at_level; j++){
+                var xPos = start.x + side_length * k;
+                var yPos = start.y + side_length * j;
+                var point = new Coordinate(xPos, yPos);
+
+                // rescale each grid position by a small random scaling factor
+                grid[xPos][yPos] = variedAverage(grid, scale * 0.25, [point, point]);
+            }
+        }*/
     }
 }
 
-function generate()
+function calcGridSize(steps)
 {
-    main();
+    // gridSize = 2 * prevGridSize - 1 requires a loop calculating every grid size
+    // gridSize = 2^(i+1) - (2^i - 1) is equivalent but does not require loop
+    var base = Math.pow(2, steps);
+    return 2 * base - (base - 1);
+}
+
+function createGrid(steps, gridSize, neighbors)
+{
+    var start = new Coordinate(0, 0);
+
+    /* create a grid */
+    var grid = new Array(gridSize);
+    for(var i = 0; i < gridSize; i++)
+    {
+        grid[i] = new Array(gridSize)
+    }
+
+    if (neighbors)
+    {
+        if (neighbors.east)
+        {
+            // if the east neighbor exists, make the east border match the neighbor's west
+            grid[gridSize-1] = neighbors.east[0];
+        }
+
+        if (neighbors.west)
+        {
+            // if the west neighbor exists, make the west border match the neighbor's east
+            grid[0] = neighbors.west[gridSize-1];
+        }
+
+        if (neighbors.north)
+        {
+            // if the north neighbor exists, make the north border match the neighbor's south
+            for (var i=0; i<gridSize; i++)
+            {
+                grid[i][gridSize-1] = neighbors.north[i][0];
+            }
+        }
+
+        if (neighbors.south)
+        {
+            // if the south neighbor exists, make the south border match the neighbor's north
+            for (var i=0; i<gridSize; i++)
+            {
+                grid[i][0] = neighbors.south[i][gridSize-1];
+            }
+        }
+    }
+
+    // set the corners that are still not set yet
+    /* Assign inital corner values. Should be randomly generated */
+    grid[0][0]                      = grid[0][0]                    || randomNormal(10, gridSize/4);
+    grid[0][gridSize-1]             = grid[0][gridSize-1]           || randomNormal(10, gridSize/4);
+    grid[gridSize-1][0]             = grid[gridSize-1][0]           || randomNormal(10, gridSize/4);
+    grid[gridSize-1][gridSize-1]    = grid[gridSize-1][gridSize-1]  || randomNormal(10, gridSize/4);
+
+    /* 2.5 = maxHeight / 4 */
+    BFHeights (start, (gridSize - 1), gridSize / 2, grid, steps);
+
+    //gridToConsole(grid);
+
+    return grid;
 }
 
 function main()
 {
     window.onkeypress = handleKeyPress;
-    var i;
-    var steps = 9;  /* Assign grid size here can handle up to 9 reasonably well  10 takes like 30 seconds, but loks great*/
-    var gridSize = 2;
+    /* Assign grid size here can handle up to 9 reasonably well  10 takes like 30 seconds, but looks great*/
+    var steps = 8;
+    var gridSize = calcGridSize(steps);
+    var numGridsSquared = 3;
 
-    for(i = 0; i < steps; i ++)
-    {
-        gridSize = ( 2 * gridSize ) - 1;
+    // create many grids to make the landscape more interesting
+    var grids = [];
+    for (var i=0; i<numGridsSquared; i++){
+        grids[i] = [];
+        for (var j=0; j<numGridsSquared; j++){
+            // create neighbors, only south and west will exist due to the
+            // order these are being created.
+            var neighbors = {
+                south : (j-1 >= 0) ? grids[i][j-1] : null,  // the condition is to not go out of bounds on the array
+                west  : (i-1 >= 0) ? grids[i-1][j] : null   // the condition is to not go out of bounds on the array
+            };
+            grids[i][j] = createGrid(steps, gridSize, neighbors);
+        }
     }
 
-
-
-
-    var start = new Coordinate(0, 0);
-
-    /* create a grid */
-    var Grid = new Array(gridSize);
-    for(i = 0; i < gridSize; i++)
+    // put all the grids together into the master grid
+    var masterGrid = [];
+    for (var i=0; i<numGridsSquared; i++)
     {
-        Grid[i] = new Array(gridSize)
+        var offset = i * gridSize;
+        for (var j=0; j<gridSize; j++)
+        {
+            // each grid's edges are equal to their neighbors so skip it
+            if (j == gridSize-1 && i != numGridsSquared-1)
+            {
+                continue;
+            }
+
+            var mgIndex = masterGrid.length;
+            masterGrid[mgIndex] = grids[i][0][j].slice(0, -1);
+            for (var k=1; k<numGridsSquared; k++)
+            {
+                // dont add the last bit of each strip because the borders of each edge are the same
+                var stripToAdd = (k != numGridsSquared-1) ? grids[i][k][j].slice(0, -1) : grids[i][k][j];
+                masterGrid[mgIndex] = masterGrid[mgIndex].concat(stripToAdd);
+            }
+        }
     }
-
-    /* Assign inital corner values. Should be randomly generated */
-    Grid[0][0] = randomNormal(10, gridSize/4);
-    Grid[0][gridSize-1] =randomNormal(10, gridSize/4);
-    Grid[gridSize-1][0] = randomNormal(10, gridSize/16);
-    Grid[gridSize-1][gridSize-1] = randomNormal(10, gridSize/16);
-
-    /* 2.5 = maxHeight / 4 */
-    BFHeights (start, (gridSize - 1), gridSize / 2, Grid, steps);
-    //generateHeights(start, (gridSize - 1), gridSize / 2, Grid, steps);
-
-    //gridToConsole(Grid);
 
     // prepare data for use by Three.js
-    var geometry = prepareData(Grid);
+    var geometry = prepareData(masterGrid);
     // render!
-    render(geometry, gridSize);
-
-
+    createScene(geometry, masterGrid.length);//gridSize);
 }
-
-
