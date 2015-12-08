@@ -84,6 +84,8 @@ function waterLevel(height){
 }
 
 // only have one copy of each color for speed and memory optimization
+var DEEP_WATER_COLOR = new THREE.Color(0x070099);
+var MID_WATER_COLOR = new THREE.Color(0x004e6f);
 var WATER_COLOR = new THREE.Color(0x129793);   // water color
 var SAND_COLOR  = new THREE.Color(0xc2b280);   // sand color
 var GRASS_COLOR = new THREE.Color(0x007B0C);   // grass color
@@ -91,9 +93,16 @@ var STONE_COLOR = new THREE.Color(0x444250);   // stone color
 
 function getColor(height)
 {
-    var rand = Math.abs(randomNormal(1, .15)) * height;
-
-    if (rand < 0)
+    var rand = Math.abs(randomNormal(1, .25)) * height;
+    if (rand < -50)
+    {
+        return DEEP_WATER_COLOR;
+    }
+    else if (rand < -20)
+    {
+        return MID_WATER_COLOR;
+    }
+    else if (rand < 0)
     {
         return WATER_COLOR;
     }
@@ -101,7 +110,7 @@ function getColor(height)
     {
         return SAND_COLOR;
     }
-    else if(rand < 80)
+    else if(rand < 70)
     {
         return GRASS_COLOR;
     }

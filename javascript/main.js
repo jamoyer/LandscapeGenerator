@@ -1,8 +1,11 @@
-$('#terrainControls').submit(function () {
-	main();
-	return false;
-});
 var SEED = 0;
+
+$("#terrainControls").submit(function()
+{
+    this.submit();
+    location.reload();    
+});
+
 
 function getUrlParams()
 {
@@ -25,10 +28,24 @@ function getUrlParams()
     return urlParams;
 }
 
+
 function main()
 {
     window.onkeypress = handleKeyPress;
 
+    var urlParams = getUrlParams();
+    if (urlParams.seed){
+        document.getElementById("seed").value = urlParams.seed;
+    }
+    if (urlParams.smoothness){
+        document.getElementById("smoothness").value = urlParams.smoothness;
+    }
+    if (urlParams.detail_level){
+        document.getElementById("detail_level").value = urlParams.detail_level;
+    }
+    if (urlParams.grids_per_side){
+        document.getElementById("grids_per_side").value = urlParams.grids_per_side;
+    }
     /* Get values from form*/
     SEED = document.getElementById("seed").value;
 
