@@ -1,6 +1,9 @@
 <html>
     <head>
         <title>Landscape Generation</title>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     </head>
     <body>
         <div class="container">
@@ -8,14 +11,25 @@
                 Please use a browser that supports "canvas"
             </canvas>
             <div class="controls">
+                
                 <div class="active">
                     <!-- Controls for things like sun that don't need a rebuild of terrain -->
                 </div>
-                <form onsubmit="main()">
+                
+                <form id="terrainControls">
+                    <label for="seed">Seed</label>
+                    <input type="text" id="seed" value="0">
+                    
                     <label for="smoothness">Smoothness</label>
-                    <input type="range" id="smoothness" min="1.0" value="2.3" max="3.0" step="100">
+                    <input type="range" id="smoothness" value="1.8" min="1.0" max="2.5" step=".05">
+       
+                    <label for="detail_level">Detail Level</label>
+                    <input type="range" id="detail_level" value="8" min="4" max="12">
+                    
+                    <label for="grids_per_side">Stitched Grids per Side</label>
+                    <input type="range" id="grids_per_side" value="3" min="0" max="4">
 
-                    <input type="submit" value="submit">
+                    <input type="submit" value="submit" onclick ="main();">
                 </form>
             </div>
             <div>
@@ -28,6 +42,7 @@
         </div>
     </body>
     <!--<script src="http://threejs.org/build/three.min.js"></script>-->
+    <script src ="javascript/main.js"></script>
     <script src ="javascript/threejs/three.min.js"></script>
     <script src ="javascript/coordinate.js"></script>
     <script src ="javascript/randomNormal.js"></script>

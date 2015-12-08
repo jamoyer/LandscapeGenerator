@@ -14,30 +14,31 @@ function prepareData(grid) {
     var numVertices = 0;
     var before = Date.now();
     /* add vertices and faces for each square in the grid */
-    for(var x = 0, xplus = 1; x < gridSize - 1 ; x=xplus,xplus++)
+    for(var x = 0, xplus = 1; x < gridSize - 1 ; x=xplus, xplus++)
     {
-        for(var z = 0, zplus = 1; z < gridSize - 1; z=zplus,zplus++)
+        for(var z = 0, zplus = 1; z < gridSize - 1; z=zplus, zplus++)
         {
-            /* add vertices for the lower-right triangle
-            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ),
-                                    new THREE.Vector3( x+1, waterLevel(grid[x+1][z]), z ),
-                                    new THREE.Vector3( x+1, waterLevel(grid[x+1][z+1]), z+1 ) );
-            */
-            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ) );
-            geometry.colors.push(getColor(grid[x][z]));
+            /* add vertices for the lower-right triangle */
+     geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
+            geometry.colors.push(getColor(grid[xplus][zplus]));
+
             geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][z]), z ) );
             geometry.colors.push(getColor(grid[xplus][z]));
-            geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
-            geometry.colors.push(getColor(grid[xplus][zplus]));
-
-
-            /* add vertices for the upper-left triangle [pretty sure we need CCW coordinate order] */
+       
             geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ) );
             geometry.colors.push(getColor(grid[x][z]));
-            geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
-            geometry.colors.push(getColor(grid[xplus][zplus]));
+
+            /* add vertices for the upper-left triangle [pretty sure we need CCW coordinate order] */
+            
             geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][zplus]), zplus )  );
             geometry.colors.push(getColor(grid[x][zplus]));
+            
+            geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
+            geometry.colors.push(getColor(grid[xplus][zplus]));
+            
+            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ) );
+            geometry.colors.push(getColor(grid[x][z]));
+            
 
             /* push face for lower-right triangle */
             var f1 = new THREE.Face3(numVertices, numVertices+1, numVertices+2);
@@ -63,11 +64,9 @@ function prepareData(grid) {
 
     /* remove duplicate vertices and update faces.  Better performance? */
     geometry.mergeVertices(geometry);
-
-
+    
     /* compute face normals so we can do lighting */
     geometry.computeFaceNormals();
-
 
     return geometry;
 }
@@ -134,8 +133,7 @@ function createScene(geometry, size) {
             vertexColors: THREE.VertexColors,
             wireframe: false,
             specular: 0x888888,
-            shininess: 1,
-            side: THREE.DoubleSide
+            shininess: 1
         });
     var terrain = new THREE.Mesh(geometry, material);
     var scale =  1 / size;

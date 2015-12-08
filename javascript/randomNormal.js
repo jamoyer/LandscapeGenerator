@@ -33,8 +33,16 @@ var MODULUS = 2147483647; // DON'T CHANGE THIS VALUE
 function Rng(seed) {
     // Rng is either seeded with something or use the current time
     // Mod time by MODULUS to make sure it doesnt go over
-    this.seed = seed || Math.max(Date.now() % MODULUS, 1);
+    if (seed > 0)
+    {
+        this.seed = seed;
+    }
+    else{
+        this.seed = Math.max(Date.now() % MODULUS, 1);
+    }
+
     console.log("Seed:"+this.seed);
+    document.getElementById("seed").value = this.seed;
 }
 
 Rng.prototype.MODULUS      = MODULUS;
@@ -88,7 +96,7 @@ Rng.prototype.testRandom = function() {
 //var SEED = 12468568;
 //var RNG_INSTANCE = new Rng(1243378558); // creates an epic mountain
 //var RNG_INSTANCE = new Rng(12438568); // creates a map with a balance of mountains, grass, and water
-var RNG_INSTANCE = new Rng(/*SEED*/);
+var RNG_INSTANCE = new Rng(SEED);
 
 /* ========================================================================
  * Returns a normal (Gaussian) distributed real number.

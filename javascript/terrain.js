@@ -1,8 +1,3 @@
-
-
-var H = 1.8; // this is the smoothness constant higher == smoother need some sort of keyboard control
-
-
 // print heights to console [useless for large grids]
 function gridToConsole(grid)
 {
@@ -32,17 +27,11 @@ function Coordinate (x, y)
 /* Average grid heights and add a randomly distributed normal centered at 0 */
 function variedAverage (grid, variation_scale, values)
 {
-    var i;
     var sum = 0.0;
-    var distance = Math.max(Math.abs(values[0].x - values[1].x), Math.abs(values[0].y - values[1].y));
-    var max = 0;
-    var min = 1000;
 
-    for (i = 0; i < values.length; i ++)
+    for (var i = 0; i < values.length; i ++)
     {
         sum += grid [values[i].x] [values[i].y];
-        if (grid [values[i].x] [values[i].y] > max)    { max = grid [values[i].x] [values[i].y]}
-        if (grid [values[i].x] [values[i].y] < min)    { min = grid [values[i].x] [values[i].y]}
     }
 
     var random = randomNormal(0, .33);
@@ -65,9 +54,13 @@ function variedAverage (grid, variation_scale, values)
         // height_scale = 3.366*height_level^3 - 1.952*height_level^2 + 0.353*height_level + 0.248
         height_scale = (((3.366 * height_level) - 1.952) * height_level + 0.353) * height_level + 0.248;
     }
-
     return avg + (random * variation_scale * height_scale);
 }
+
+
+
+
+
 /* Recursively generate height values for 2D terrain array
 
     Grid side length must be of the sequence 2, 3, 5, 9, 17, 33, 65 ...
@@ -84,8 +77,8 @@ half_length         [ start.x , (start.y + sideLength) ]
     -    -            O     0     O   <-- [ (start.x + sideLength) , (start.y + sideLength) ]
     |    |
     -    |            0     0     0
-        |
-        -            O     0     O   <-- [ (start.x + sideLength) , start.y ]
+         |
+         -            O     0     O   <-- [ (start.x + sideLength) , start.y ]
 
         ^            ^
         |            |
@@ -142,6 +135,7 @@ function generateHeights (bottom_left, side_length, scale, grid)
 };
 
 
+/* prevent sharp edges by defining heights bredth first */
 function BFHeights(start, grid_length, scale, grid, steps)
 {
 
@@ -181,7 +175,7 @@ function BFHeights(start, grid_length, scale, grid, steps)
                 grid [right_edge.x] [right_edge.y]   = grid [right_edge.x] [right_edge.y]   || variedAverage (grid, scale, [bottom_right, top_right]);
                 grid [top_edge.x] [top_edge.y]       = grid [top_edge.x] [top_edge.y]       || variedAverage (grid, scale, [top_left, top_right]);
                 grid [bottom_edge.x] [bottom_edge.y] = grid [bottom_edge.x] [bottom_edge.y] || variedAverage (grid, scale, [bottom_left, bottom_right]);
-                grid [center.x] [center.y]           =  variedAverage (grid, scale, [bottom_left, top_left, top_right, bottom_right]);
+                grid [center.x] [center.y]           = grid [center.x] [center.y]           || variedAverage (grid, scale, [bottom_left, top_left, top_right, bottom_right]);
             }
         }
 
@@ -208,57 +202,76 @@ function calcGridSize(steps)
     return 2 * base - (base - 1);
 }
 
-function createGrid(steps, gridSize, neighbors)
+function createDoubleArr(gridSize)
 {
-    var start = new Coordinate(0, 0);
-
-    /* create a grid */
     var grid = new Array(gridSize);
+        
     for(var i = 0; i < gridSize; i++)
     {
         grid[i] = new Array(gridSize)
     }
+    
+    return grid;
+        
+}
 
-    if (neighbors)
-    {
-        if (neighbors.east)
-        {
-            // if the east neighbor exists, make the east border match the neighbor's west
-            grid[gridSize-1] = neighbors.east[0];
-        }
 
-        if (neighbors.west)
+function createGrid(steps, gridSize, neighbors, preGrid)
+{
+    var start = new Coordinate(0, 0);
+    var grid = createDoubleArr(gridSize);
+    
+    if (!preGrid){
+        if (neighbors)
         {
-            // if the west neighbor exists, make the west border match the neighbor's east
-            grid[0] = neighbors.west[gridSize-1];
-        }
-
-        if (neighbors.north)
-        {
-            // if the north neighbor exists, make the north border match the neighbor's south
-            for (var i=0; i<gridSize; i++)
+            if (neighbors.east)
             {
-                grid[i][gridSize-1] = neighbors.north[i][0];
+                // if the east neighbor exists, make the east border match the neighbor's west
+                grid[gridSize-1] = neighbors.east[0];
+            }
+    
+            if (neighbors.west)
+            {
+                // if the west neighbor exists, make the west border match the neighbor's east
+                grid[0] = neighbors.west[gridSize-1];
+            }
+    
+            if (neighbors.north)
+            {
+                // if the north neighbor exists, make the north border match the neighbor's south
+                for (var i=0; i<gridSize; i++)
+                {
+                    grid[i][gridSize-1] = neighbors.north[i][0];
+                }
+            }
+    
+            if (neighbors.south)
+            {
+                // if the south neighbor exists, make the south border match the neighbor's north
+                for (var i=0; i<gridSize; i++)
+                {
+                    grid[i][0] = neighbors.south[i][gridSize-1];
+                }
             }
         }
-
-        if (neighbors.south)
+    
+        // set the corners that are still not set yet
+        /* Assign inital corner values. Should be randomly generated */
+        grid[0][0]                      = grid[0][0]                    || randomNormal(10, gridSize/4);
+        grid[0][gridSize-1]             = grid[0][gridSize-1]           || randomNormal(10, gridSize/4);
+        grid[gridSize-1][0]             = grid[gridSize-1][0]           || randomNormal(10, gridSize/4);
+        grid[gridSize-1][gridSize-1]    = grid[gridSize-1][gridSize-1]  || randomNormal(10, gridSize/4);
+    }else{
+        var scale = (gridSize-1) / (preGrid.length - 1);
+        for(var i = 0; i < preGrid.length; i ++)
         {
-            // if the south neighbor exists, make the south border match the neighbor's north
-            for (var i=0; i<gridSize; i++)
+            for(var j = 0; j < preGrid.length; j ++)
             {
-                grid[i][0] = neighbors.south[i][gridSize-1];
+                grid[Math.floor(i * scale)][Math.floor(j * scale)] = preGrid[i][j];
             }
         }
     }
-
-    // set the corners that are still not set yet
-    /* Assign inital corner values. Should be randomly generated */
-    grid[0][0]                      = grid[0][0]                    || randomNormal(10, gridSize/4);
-    grid[0][gridSize-1]             = grid[0][gridSize-1]           || randomNormal(10, gridSize/4);
-    grid[gridSize-1][0]             = grid[gridSize-1][0]           || randomNormal(10, gridSize/4);
-    grid[gridSize-1][gridSize-1]    = grid[gridSize-1][gridSize-1]  || randomNormal(10, gridSize/4);
-
+    
     /* 2.5 = maxHeight / 4 */
     BFHeights (start, (gridSize - 1), gridSize / 2, grid, steps);
 
@@ -267,55 +280,8 @@ function createGrid(steps, gridSize, neighbors)
     return grid;
 }
 
-function main()
-{
-    window.onkeypress = handleKeyPress;
-    /* Assign grid size here can handle up to 9 reasonably well  10 takes like 30 seconds, but looks great*/
-    var steps = 8;
-    var gridSize = calcGridSize(steps);
-    var numGridsSquared = 3;
 
-    // create many grids to make the landscape more interesting
-    var grids = [];
-    for (var i=0; i<numGridsSquared; i++){
-        grids[i] = [];
-        for (var j=0; j<numGridsSquared; j++){
-            // create neighbors, only south and west will exist due to the
-            // order these are being created.
-            var neighbors = {
-                south : (j-1 >= 0) ? grids[i][j-1] : null,  // the condition is to not go out of bounds on the array
-                west  : (i-1 >= 0) ? grids[i-1][j] : null   // the condition is to not go out of bounds on the array
-            };
-            grids[i][j] = createGrid(steps, gridSize, neighbors);
-        }
-    }
 
-    // put all the grids together into the master grid
-    var masterGrid = [];
-    for (var i=0; i<numGridsSquared; i++)
-    {
-        var offset = i * gridSize;
-        for (var j=0; j<gridSize; j++)
-        {
-            // each grid's edges are equal to their neighbors so skip it
-            if (j == gridSize-1 && i != numGridsSquared-1)
-            {
-                continue;
-            }
 
-            var mgIndex = masterGrid.length;
-            masterGrid[mgIndex] = grids[i][0][j].slice(0, -1);
-            for (var k=1; k<numGridsSquared; k++)
-            {
-                // dont add the last bit of each strip because the borders of each edge are the same
-                var stripToAdd = (k != numGridsSquared-1) ? grids[i][k][j].slice(0, -1) : grids[i][k][j];
-                masterGrid[mgIndex] = masterGrid[mgIndex].concat(stripToAdd);
-            }
-        }
-    }
 
-    // prepare data for use by Three.js
-    var geometry = prepareData(masterGrid);
-    // render!
-    createScene(geometry, masterGrid.length);//gridSize);
-}
+
