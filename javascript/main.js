@@ -4,29 +4,49 @@ $('#terrainControls').submit(function () {
 });
 var SEED = 0;
 
+function getUrlParams()
+{
+    // parse the url parameters
+    var urlParams; // url params will be inside this object
+    (window.onpopstate = function () {
+        var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) {
+            return decodeURIComponent(s.replace(pl, " "));
+        },
+        query  = window.location.search.substring(1);
+
+        urlParams = {};
+        while (match = search.exec(query)){
+            urlParams[decode(match[1])] = decode(match[2]);
+        }
+    })();
+    return urlParams;
+}
 
 function main()
 {
     window.onkeypress = handleKeyPress;
-    
+
     /* Get values from form*/
     SEED = document.getElementById("seed").value;
 
         RNG_INSTANCE = new Rng(document.getElementById("seed").value);
-    
+
     /* smoothness constant */
     H = document.getElementById("smoothness").value;
     /* level of detail 9 reasonably well*/
     var detail = document.getElementById("detail_level").value;
 	/* number of grids stitched together (side length) */
 	var numGridsSquared = document.getElementById("grids_per_side").value;
-   
+
    var masterGrid;
    var gridSize = calcGridSize(detail);
-    
+
     if (numGridsSquared == 0){
         var grid = createDoubleArr(gridSize);
-        
+
         grid[0][0] = 0;
         grid[0][gridSize-1] = 0;
         grid[gridSize-1][0] = 0;
@@ -38,12 +58,12 @@ function main()
         grid[half + quart][quart] = 100;
         grid[quart] [half+ quart] = 25;
         grid[half + quart] [half+ quart] = 35;
-        
+
         var preGrid = [
             [0, 0],
             [0, 0]
         ];
-        
+
         masterGrid = createGrid(detail, gridSize, null, preGrid);
     }else{
         // create many grids to make the landscape more interesting
@@ -60,7 +80,7 @@ function main()
                 grids[i][j] = createGrid(detail, gridSize, neighbors, null);
             }
         }
-    
+
         // put all the grids together into the master grid
         masterGrid = [];
         for (var i=0; i<numGridsSquared; i++)
@@ -73,7 +93,7 @@ function main()
                 {
                     continue;
                 }
-    
+
                 var mgIndex = masterGrid.length;
                 masterGrid[mgIndex] = grids[i][0][j].slice(0, -1);
                 for (var k=1; k<numGridsSquared; k++)
@@ -85,9 +105,9 @@ function main()
             }
         }
     }
-    
-    
-    
+
+
+
 
 
     // prepare data for use by Three.js
