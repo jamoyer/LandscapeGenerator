@@ -90,21 +90,54 @@ var WATER_COLOR = new THREE.Color(0x129793);   // water color
 var SAND_COLOR  = new THREE.Color(0xc2b280);   // sand color
 var GRASS_COLOR = new THREE.Color(0x007B0C);   // grass color
 var STONE_COLOR = new THREE.Color(0x444250);   // stone color
+function ColorLuminance(hex, lum) {
+    validate hex string
+    hex = String(hex).replace(/[^0-9a-f]/gi, '');
+    if (hex.length < 6) {
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    }
+    lum = lum || 0;
+
+    // convert to decimal and change luminosity
+    var rgb = "#", c, i;
+    for (i = 0; i < 3; i++) {
+        c = parseInt(hex.substr(i*2,2), 16);
+        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+        rgb += ("00"+c).substr(c.length);
+    }
+    return rgb;
+}
+
+var WATER_COLORS;
+function getWaterColor(depth)
+{
+    if (!WATER_COLORS)
+    {
+        WATER_COLORS = [];
+        for (var i=0; i<20; i++)
+        {
+            WATER_COLORS[WATER_COLORS.length] = ColorLuminance(DEEP_WATER_COLOR, i/20);
+        }
+    }
+
+    return WATER_COLORS[Math.floor(-depth * 0.4)];
+}
 
 function getColor(height)
 {
     var rand = Math.abs(randomNormal(1, .25)) * height;
-    if (rand < -50)
+//    if (rand < -50)
+//    {
+//        return DEEP_WATER_COLOR;
+//    }
+//    else if (rand < -20)
+//    {
+//        return MID_WATER_COLOR;
+//    }
+     if (rand < 0)
     {
-        return DEEP_WATER_COLOR;
-    }
-    else if (rand < -20)
-    {
-        return MID_WATER_COLOR;
-    }
-    else if (rand < 0)
-    {
-        return WATER_COLOR;
+//        return WATER_COLOR;
+        return getWaterColor(height);
     }
     else if(rand < 10)
     {
