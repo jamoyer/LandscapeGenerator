@@ -62,23 +62,10 @@ function main()
    var gridSize = calcGridSize(detail);
 
     if (numGridsSquared == 0){
-        var grid = createDoubleArr(gridSize);
-
-        grid[0][0] = 0;
-        grid[0][gridSize-1] = 0;
-        grid[gridSize-1][0] = 0;
-        grid[gridSize-1][gridSize-1] = 0;
-        var half = Math.floor(gridSize/2);
-        var quart = Math.floor(half/2);
-        grid[half][half] = -15;
-        grid[quart][quart] = 40;
-        grid[half + quart][quart] = 100;
-        grid[quart] [half+ quart] = 25;
-        grid[half + quart] [half+ quart] = 35;
 
         var preGrid = [
-            [0, 0],
-            [0, 0]
+            [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)],
+            [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)]
         ];
 
         masterGrid = createGrid(detail, gridSize, null, preGrid);

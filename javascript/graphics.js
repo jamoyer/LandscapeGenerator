@@ -115,17 +115,8 @@ function getWaterColor(depth)
 function getColor(height)
 {
     var rand = Math.abs(randomNormal(1, .25)) * height;
-//    if (rand < -50)
-//    {
-//        return DEEP_WATER_COLOR;
-//    }
-//    else if (rand < -20)
-//    {
-//        return MID_WATER_COLOR;
-//    }
-     if (rand < 0)
+    if (rand < 0)
     {
-//        return WATER_COLOR;
         return getWaterColor(height);
     }
     else if(rand < 10)
