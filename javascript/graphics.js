@@ -90,37 +90,26 @@ var WATER_COLOR = new THREE.Color(0x129793);   // water color
 var SAND_COLOR  = new THREE.Color(0xc2b280);   // sand color
 var GRASS_COLOR = new THREE.Color(0x007B0C);   // grass color
 var STONE_COLOR = new THREE.Color(0x444250);   // stone color
-function ColorLuminance(hex, lum) {
-    validate hex string
-    hex = String(hex).replace(/[^0-9a-f]/gi, '');
-    if (hex.length < 6) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-    }
-    lum = lum || 0;
-
-    // convert to decimal and change luminosity
-    var rgb = "#", c, i;
-    for (i = 0; i < 3; i++) {
-        c = parseInt(hex.substr(i*2,2), 16);
-        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-        rgb += ("00"+c).substr(c.length);
-    }
-    return rgb;
-}
 
 var WATER_COLORS;
+
 function getWaterColor(depth)
 {
     if (!WATER_COLORS)
     {
+        var HSL = WATER_COLOR.getHSL();
         WATER_COLORS = [];
         for (var i=0; i<20; i++)
         {
-            WATER_COLORS[WATER_COLORS.length] = ColorLuminance(DEEP_WATER_COLOR, i/20);
+            var color = new THREE.Color()
+            color.copy(WATER_COLOR);
+            color.offsetHSL(0, 0, -i * HSL.l * 0.1)
+            WATER_COLORS[WATER_COLORS.length] = color;
         }
     }
-
-    return WATER_COLORS[Math.floor(-depth * 0.4)];
+    
+    depth = Math.floor((Math.min((depth * -1), 70) / 70) * 19);
+    return WATER_COLORS[depth];
 }
 
 function getColor(height)
