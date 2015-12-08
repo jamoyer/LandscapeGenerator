@@ -37,12 +37,13 @@ function Rng(seed) {
     {
         this.seed = seed;
     }
-    else{
+    else
+    {
         this.seed = Math.max(Date.now() % MODULUS, 1);
+        document.getElementById("seed").value = this.seed;
     }
 
     console.log("Seed:"+this.seed);
-    document.getElementById("seed").value = this.seed;
 }
 
 Rng.prototype.MODULUS      = MODULUS;
@@ -106,21 +107,20 @@ var RNG_INSTANCE = new Rng(SEED);
  * J. Applied Statistics, 1974, vol 23, pp 96-97.
  * ========================================================================
  */
+// DO NOT TOUCH THESE MAGIC CONSTANTS
+const P0 = 0.322232431088;
+const P1 = 1.0;
+const P2 = 0.342242088547;
+const P3 = 0.204231210245e-1;
+const P4 = 0.453642210148e-4;
+
+const Q0 = 0.099348462606;
+const Q1 = 0.588581570495;
+const Q2 = 0.531103462366;
+const Q3 = 0.103537752850;
+const Q4 = 0.385607006340e-2;
 function randomNormal(mean, stndev)
 {
-    // DO NOT TOUCH THESE MAGIC CONSTANTS
-    var p0 = 0.322232431088;
-    var p1 = 1.0;
-    var p2 = 0.342242088547;
-    var p3 = 0.204231210245e-1;
-    var p4 = 0.453642210148e-4;
-
-    var q0 = 0.099348462606;
-    var q1 = 0.588581570495;
-    var q2 = 0.531103462366;
-    var q3 = 0.103537752850;
-    var q4 = 0.385607006340e-2;
-
     var u = RNG_INSTANCE.random();
     if (u < 0.5)
     {
@@ -130,8 +130,8 @@ function randomNormal(mean, stndev)
     {
         var t = Math.sqrt(-2.0 * Math.log(1.0 - u));
     }
-    var p   = p0 + t * (p1 + t * (p2 + t * (p3 + t * p4)));
-    var q   = q0 + t * (q1 + t * (q2 + t * (q3 + t * q4)));
+    var p   = P0 + t * (P1 + t * (P2 + t * (P3 + t * P4)));
+    var q   = Q0 + t * (Q1 + t * (Q2 + t * (Q3 + t * Q4)));
     if (u < 0.5)
     {
         var z = p / q - t;

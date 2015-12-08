@@ -31,6 +31,7 @@ function getUrlParams()
 
 function main()
 {
+    var mainBefore = Date.now();
     window.onkeypress = handleKeyPress;
 
     var urlParams = getUrlParams();
@@ -46,10 +47,9 @@ function main()
     if (urlParams.grids_per_side){
         document.getElementById("grids_per_side").value = urlParams.grids_per_side;
     }
-    /* Get values from form*/
-    SEED = document.getElementById("seed").value;
 
-        RNG_INSTANCE = new Rng(document.getElementById("seed").value);
+    /* Get values from form*/
+    RNG_INSTANCE = new Rng(document.getElementById("seed").value);
 
     /* smoothness constant */
     H = document.getElementById("smoothness").value;
@@ -58,8 +58,9 @@ function main()
 	/* number of grids stitched together (side length) */
 	var numGridsSquared = document.getElementById("grids_per_side").value;
 
-   var masterGrid;
-   var gridSize = calcGridSize(detail);
+    var before = Date.now();
+    var masterGrid;
+    var gridSize = calcGridSize(detail);
 
     if (numGridsSquared == 0){
 
@@ -110,12 +111,21 @@ function main()
         }
     }
 
-
-
-
+    var after = Date.now();
+    console.log("Time to create Master Grid:" + (after-before));
 
     // prepare data for use by Three.js
+    before = Date.now();
     var geometry = prepareData(masterGrid);
+    after = Date.now();
+    console.log("Time to prepare geometry:" + (after-before));
+
     // render!
-    createScene(geometry,masterGrid.length);//gridSize);
+    before = Date.now();
+    createScene(geometry, masterGrid.length);
+    after = Date.now();
+    console.log("Time to render:" + (after-before));
+
+    var mainAfter = Date.now();
+    console.log("Time to run main:" + (mainAfter-mainBefore));
 }
