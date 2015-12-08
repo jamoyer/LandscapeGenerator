@@ -185,6 +185,8 @@ function getColor(height)
     return STONE_COLOR;
 }
 
+var pauseSun = false;
+
 /* --Render-- */
 function createScene(geometry, size) {
     /* create the scene object */
@@ -252,10 +254,13 @@ function createScene(geometry, size) {
         sun.position.set(0, yPos, Math.cos(x));
 
         // rotate make night go much faster than day
-        x+= (yPos > -0.1) ? 0.015 : 0.1;
-      };
+        if (!pauseSun)
+        {
+            x+= (yPos > -0.1) ? 0.015 : 0.1;
+        }
+    };
 
-      render();
+    render();
 }
 
 /* Controls */
@@ -282,8 +287,11 @@ function cameraControl(c, ch)
     var q, q2;
 
     switch (ch)
-      {
+    {
         /* movement in plane */
+        case ' ':
+            pauseSun = !pauseSun;
+            return true;
         case 'w':
             c.translateZ(-0.1);
             return true;
