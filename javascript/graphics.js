@@ -139,6 +139,10 @@ function prepareData(grid) {
     return geometry;
 }
 
+
+
+/* COLORS */
+
 // only have one copy of each color for speed and memory optimization
 var DEEP_WATER_COLOR = new THREE.Color(0x070099);
 var MID_WATER_COLOR = new THREE.Color(0x004e6f);
@@ -146,31 +150,35 @@ var WATER_COLOR = new THREE.Color(0x129793);   // water color
 var SAND_COLOR  = new THREE.Color(0xc2b280);   // sand color
 var GRASS_COLOR = new THREE.Color(0x007B0C);   // grass color
 var STONE_COLOR = new THREE.Color(0x444250);   // stone color
-
 var WATER_COLORS;
+
 
 function getWaterColor(depth)
 {
+    // if Water colors array isn't created yet, then create it
     if (!WATER_COLORS)
-    {
-        var HSL = WATER_COLOR.getHSL();
+    {   
         WATER_COLORS = [];
+        var HSL = WATER_COLOR.getHSL();
         for (var i=0; i<20; i++)
         {
             var color = new THREE.Color()
             color.copy(WATER_COLOR);
-            color.offsetHSL(0, 0, -i * HSL.l * 0.1)
+            color.offsetHSL(0, 0, -i * HSL.l * 0.1);    //offset the lightness by 10% per step
             WATER_COLORS[WATER_COLORS.length] = color;
         }
     }
-
-    depth = Math.floor((Math.min(-depth, 70) / 70) * 19);
-    return WATER_COLORS[depth];
+    // calculate an index to use for the Water_Colors array [70 is max depth considered for color change] 19 number of colors in array
+    var index = Math.floor((Math.min(-depth, 70) / 70) * 19);
+    return WATER_COLORS[index];
 }
 
 function getColor(height)
 {
+    // randomly scale height by a factor normally distributed about 1 to allow for variation
     var rand = Math.abs(randomNormal(1, .25)) * height;
+    
+    // return a color to use
     if (rand < 0)
     {
         return getWaterColor(height);
@@ -187,9 +195,14 @@ function getColor(height)
 }
 
 
-var pauseSun = false;
+
+
+
 
 /* --Render-- */
+
+var pauseSun = false;
+
 function createScene(geometry, size) {
     /* create the scene object */
     var scene = new THREE.Scene();
@@ -205,9 +218,8 @@ function createScene(geometry, size) {
     var ourCanvas = document.getElementById('theCanvas');
     var renderer = new THREE.WebGLRenderer({canvas: ourCanvas});
 
-    /* create a mesh from geometry object */
-    var material = new THREE.MeshPhongMaterial(
-    {
+    /* create a mesh from geometry object scale the grid to 1x1 and center it in scene */
+    var material = new THREE.MeshPhongMaterial( {
         vertexColors: THREE.VertexColors,
         wireframe: false,
         specular: 0x888888,
@@ -218,12 +230,11 @@ function createScene(geometry, size) {
     terrain.scale.set(scale, scale, scale);
     terrain.position.set(-0.5, 0, -0.5);
 
-    // Create Water
+    // Create Water Plane
     geometry = new THREE.PlaneGeometry(1,1);
     geometry.translate(0, 0, 0);
     geometry.rotateX(Math.PI / 2);
-    material = new THREE.MeshBasicMaterial(
-    {
+    material = new THREE.MeshBasicMaterial( {
         transparent: true,
         opacity: 0.4,
         color: 0x0077be,
@@ -238,6 +249,8 @@ function createScene(geometry, size) {
 
     var ambient = new THREE.AmbientLight(0x323232);
 
+
+    /* add everything to the scene*/
     scene.add(ambient);
     scene.add(sun);
     scene.add(terrain);
@@ -248,10 +261,11 @@ function createScene(geometry, size) {
     var render = function () {
         requestAnimationFrame( render );
         renderer.render(scene, camera);
-        // rotate about the y axis, never going below the horizon
+        
+        /* rotate about the y axis, never going below the horizon */
         //sun.position.set(Math.sin(x), Math.abs(Math.sin(x)), Math.cos(x));
 
-        // Rotate the sun to simulate night and day
+        /* Rotate the sun to simulate night and day */
         var yPos = Math.sin(x);
         sun.position.set(0, yPos, Math.cos(x));
 
@@ -263,135 +277,4 @@ function createScene(geometry, size) {
     };
 
     render();
-}
-
-/* Controls */
-
-function handleKeyPress(event)
-{
-    var ch = getChar(event);
-    if (cameraControl(camera, ch)) return;
-}
-
-function getChar(event) {
-    if (event.which == null) {
-        return String.fromCharCode(event.keyCode) // IE
-    } else if (event.which!=0 && event.charCode!=0) {
-        return String.fromCharCode(event.which)   // the rest
-    } else {
-        return null // special key
-    }
-}
-
-function cameraControl(c, ch)
-{
-    var distance = c.position.length();
-    var q, q2;
-
-    switch (ch)
-    {
-        /* movement in plane */
-        case ' ':
-            pauseSun = !pauseSun;
-            return true;
-        case 'w':
-            c.translateZ(-0.1);
-            return true;
-        case 'a':
-            c.translateX(-0.1);
-            return true;
-        case 's':
-            c.translateZ(0.1);
-            return true;
-        case 'd':
-            c.translateX(0.1);
-            return true;
-        case 'W':
-            c.translateZ(-.5);
-            return true;
-        case 'A':
-            c.translateX(-.5);
-            return true;
-        case 'S':
-            c.translateZ(.5);
-            return true;
-        case 'D':
-            c.translateX(.5);
-            return true;
-
-        /* move up-down */
-        case 'r':
-            c.translateY(0.5);
-            return true;
-        case 'f':
-            c.translateY(-0.5);
-            return true;
-
-        /* Look controls */
-        case 'j':
-            // need to do extrinsic rotation about world y axis, so multiply camera's quaternion
-            // on left
-            q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0),  5 * Math.PI / 180);
-            q2 = new THREE.Quaternion().copy(c.quaternion);
-            c.quaternion.copy(q).multiply(q2);
-            return true;
-        case 'l':
-            q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0),  -5 * Math.PI / 180);
-            q2 = new THREE.Quaternion().copy(c.quaternion);
-            c.quaternion.copy(q).multiply(q2);
-            return true;
-        case 'i':
-            // intrinsic rotation about camera's x-axis
-            c.rotateX(5 * Math.PI / 180);
-            return true;
-        case 'k':
-            c.rotateX(-5 * Math.PI / 180);
-            return true;
-
-        /* Look at origin */
-        case 'O':
-            c.lookAt(new THREE.Vector3(0, 0, 0));
-            return true;
-
-        /* camera projection */
-        case 'S':
-            c.fov = Math.min(80, c.fov + 5);
-            c.updateProjectionMatrix();
-            return true;
-        case 'W':
-            c.fov = Math.max(5, c.fov  - 5);
-            c.updateProjectionMatrix();
-            return true;
-
-        // Orbit
-        case 'J':
-            //this.orbitLeft(5, distance)
-            c.translateZ(-distance);
-            q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0),  5 * Math.PI / 180);
-            q2 = new THREE.Quaternion().copy(c.quaternion);
-            c.quaternion.copy(q).multiply(q2);
-            c.translateZ(distance);
-            return true;
-        case 'L':
-            //this.orbitRight(5, distance)
-            c.translateZ(-distance);
-            q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0),  -5 * Math.PI / 180);
-            q2 = new THREE.Quaternion().copy(c.quaternion);
-            c.quaternion.copy(q).multiply(q2);
-            c.translateZ(distance);
-            return true;
-        case 'I':
-            //this.orbitUp(5, distance)
-            c.translateZ(-distance);
-            c.rotateX(-5 * Math.PI / 180);
-            c.translateZ(distance);
-            return true;
-        case 'K':
-            //this.orbitDown(5, distance)
-            c.translateZ(-distance);
-            c.rotateX(5 * Math.PI / 180);
-            c.translateZ(distance);
-            return true;
-    }
-    return false;
 }

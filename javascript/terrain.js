@@ -163,33 +163,28 @@ function createGrid(steps, gridSize, neighbors, preGrid)
     var grid = createDoubleArr(gridSize);
 
     if (!preGrid)
-    {/* enter here if there was a preGrid defined */
+    {
+        /* enter here if there was a preGrid defined */
         if (neighbors)
         {
-            if (neighbors.east)
-            {
-                // if the east neighbor exists, make the east border match the neighbor's west
-                grid[gridSize-1] = neighbors.east[0];
-            }
-
-            if (neighbors.west)
-            {
-                // if the west neighbor exists, make the west border match the neighbor's east
-                grid[0] = neighbors.west[gridSize-1];
-            }
-
+            // if the east neighbor exists, make the east border match the neighbor's west
+            if (neighbors.east) {   grid[gridSize-1] = neighbors.east[0];   }
+            
+            // if the west neighbor exists, make the west border match the neighbor's east
+            if (neighbors.west) {   grid[0] = neighbors.west[gridSize-1];   }
+            
+            // if the north neighbor exists, make the north border match the neighbor's south
             if (neighbors.north)
-            {
-                // if the north neighbor exists, make the north border match the neighbor's south
+            {  
                 for (var i=0; i<gridSize; i++)
                 {
                     grid[i][gridSize-1] = neighbors.north[i][0];
                 }
             }
-
+            
+            // if the south neighbor exists, make the south border match the neighbor's north
             if (neighbors.south)
             {
-                // if the south neighbor exists, make the south border match the neighbor's north
                 for (var i=0; i<gridSize; i++)
                 {
                     grid[i][0] = neighbors.south[i][gridSize-1];
@@ -215,14 +210,12 @@ function createGrid(steps, gridSize, neighbors, preGrid)
             }
         }
     }
-
+    
+    // generate heights and track the time it takes
     var before = Date.now();
-    /* 2.5 = maxHeight / 4 */
     BFHeights (start, (gridSize - 1), gridSize / 2, grid, steps);
     var after = Date.now();
     console.log("Time to generate heights:" + (after-before));
-
-    //gridToConsole(grid);
-
+    
     return grid;
 }
