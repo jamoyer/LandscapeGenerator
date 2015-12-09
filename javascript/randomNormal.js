@@ -93,10 +93,6 @@ Rng.prototype.testRandom = function() {
     }
 }
 
-//2063155201 steps:8, numGridsSquared:3
-//var SEED = 12468568;
-//var RNG_INSTANCE = new Rng(1243378558); // creates an epic mountain
-//var RNG_INSTANCE = new Rng(12438568); // creates a map with a balance of mountains, grass, and water
 var RNG_INSTANCE = new Rng(SEED);
 
 /* ========================================================================
