@@ -2,8 +2,8 @@
     <head>
         <title>Landscape Generation</title>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     </head>
     <body>
         <div class="container">
@@ -11,22 +11,22 @@
                 Please use a browser that supports "canvas"
             </canvas>
             <div class="controls">
-                
-                <div class="active">
-                    <!-- Controls for things like sun that don't need a rebuild of terrain -->
-                </div>
-                
                 <form action="" method="get" id="terrainControls">
-                    
+
                     <label for="seed">Seed</label>
                     <input type="text" id="seed" name="seed" value="0">
-                    
+
                     <label for="smoothness">Smoothness</label>
                     <input type="range" name="smoothness" id="smoothness" value="1.8" min="1.0" max="2.5" step=".05">
-       
+
                     <label for="detail_level">Detail Level</label>
+<<<<<<< HEAD
                     <input type="range" name="detail_level" id="detail_level" value="8" min="1" max="12">
                     
+=======
+                    <input type="range" name="detail_level" id="detail_level" value="8" min="4" max="12">
+
+>>>>>>> 762c5dd55cb3e5a78945e4fbe71d5daf41b2a68e
                     <label for="grids_per_side">Stitched Grids per Side</label>
                     <input type="range" name="grids_per_side" id="grids_per_side" value="3" min="0" max="10">
 
@@ -35,14 +35,14 @@
             </div>
             <div>
                 <ul>
-                    <li>w,a,s,d -> Move camera forward, left, backward, right.</li>
-                    <li>i,j,k,l -> Look up, left, down, right.</li>
-                    <li>I,J,K,L -> Orbit camera up, right, down, left.</li>
+                    <li>w,a,s,d,r,f  -> Move camera forward, left, backward, right, up, down.</li>
+                    <li>i,j,k,l      -> Look up, left, down, right.</li>
+                    <li>I,J,K,L      -> Orbit camera up, right, down, left.</li>
+                    <li>Spacebar     -> Pause the sun cycle.</li>
                 </ul>
             </div>
         </div>
     </body>
-    <!--<script src="http://threejs.org/build/three.min.js"></script>-->
     <script src ="javascript/main.js"></script>
     <script src ="javascript/threejs/three.min.js"></script>
     <script src ="javascript/coordinate.js"></script>
@@ -50,5 +50,4 @@
     <script src ="javascript/terrain.js"></script>
     <script src ="javascript/graphics.js"></script>
     <script>window.onload = main</script>
-
 </html>

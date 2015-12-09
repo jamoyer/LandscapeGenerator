@@ -13,74 +13,129 @@ function prepareData(grid) {
     /* track the number of verices to easily create faces */
     var numVertices = 0;
     var before = Date.now();
+
+    var index = 0;
     /* add vertices and faces for each square in the grid */
     for(var x = 0, xplus = 1; x < gridSize - 1 ; x=xplus, xplus++)
     {
         for(var z = 0, zplus = 1; z < gridSize - 1; z=zplus, zplus++)
         {
-            /* add vertices for the lower-right triangle */
-     geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
-            geometry.colors.push(getColor(grid[xplus][zplus]));
+            // vertices
+            var topRight = null;
+            var topLeft  = null;
+            var botRight = null;
+            var botLeft  = null;
 
-            geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][z]), z ) );
-            geometry.colors.push(getColor(grid[xplus][z]));
-       
-            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ) );
-            geometry.colors.push(getColor(grid[x][z]));
+            // colors
+            var topRightC = null;
+            var topLeftC  = null;
+            var botRightC = null;
+            var botLeftC  = null;
+
+            /*
+             * Values are stored as chunks into the array like so:
+             * [TopRight, BotRight, BotLeft, TopLeft, TopRight, BotLeft]
+             *
+             * To get already created vertices we can use this to our advantage.
+             */
+            if (z > 0)
+            {
+                // reuse what was just put in the array
+                var botLeftInd  = index - 3; // lower square's top left
+                var botRightInd = index - 2; // lower square's top right
+                botLeft   = geometry.vertices[botLeftInd];
+                botLeftC  = geometry.colors[botLeftInd];
+                botRight  = geometry.vertices[botRightInd];
+                botRightC = geometry.colors[botRightInd];
+            }
+            if (x > 0)
+            {
+                // reuse what was put into the array one full gridSize back
+                var topLeftInd = index - (6 * (gridSize - 1)); // left square's top right
+                var botLeftInd = topLeftInd + 1;               // left square's bottom right
+                botLeft  = botLeft  || geometry.vertices[botLeftInd];
+                botLeftC = botLeftC || geometry.colors[botLeftInd];
+                topLeft  = geometry.vertices[topLeftInd];
+                topLeftC = geometry.colors[topLeftInd];
+            }
+
+            // get heights
+            var topRightH = grid[xplus][zplus];
+            var topLeftH  = grid[x][zplus];
+            var botRightH = grid[xplus][z];
+            var botLeftH  = grid[x][z];
+
+            // these values always must be created each iteration
+            topRight  = new THREE.Vector3(xplus, topRightH, zplus);
+            topRightC = getColor(topRightH);
+
+            // these values must be created if they weren't before, use short circuit style
+            topLeft   = topLeft   || new THREE.Vector3(x, topLeftH, zplus);
+            topLeftC  = topLeftC  || getColor(topLeftH);
+
+            botRight  = botRight  || new THREE.Vector3(xplus, botRightH, z);
+            botRightC = botRightC || getColor(botRightH);
+
+            botLeft   = botLeft   || new THREE.Vector3(x, botLeftH, z);
+            botLeftC  = botLeftC  || getColor(botLeftH);
+
+            /* add vertices for the lower-right triangle */
+            geometry.vertices[index]=topRight;
+            geometry.colors[index++]=topRightC;
+
+            geometry.vertices[index]=botRight;
+            geometry.colors[index++]=botRightC;
+
+            geometry.vertices[index]=botLeft;
+            geometry.colors[index++]=botLeftC;
 
             /* add vertices for the upper-left triangle [pretty sure we need CCW coordinate order] */
-            
-            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][zplus]), zplus )  );
-            geometry.colors.push(getColor(grid[x][zplus]));
-            
-            geometry.vertices.push( new THREE.Vector3( xplus, waterLevel(grid[xplus][zplus]), zplus ) );
-            geometry.colors.push(getColor(grid[xplus][zplus]));
-            
-            geometry.vertices.push( new THREE.Vector3( x, waterLevel(grid[x][z]), z ) );
-            geometry.colors.push(getColor(grid[x][z]));
-            
+
+            geometry.vertices[index]=topLeft;
+            geometry.colors[index++]=topLeftC;
+
+            geometry.vertices[index]=topRight;
+            geometry.colors[index++]=topRightC;
+
+            geometry.vertices[index]=botLeft;
+            geometry.colors[index++]=botLeftC;
 
             /* push face for lower-right triangle */
             var f1 = new THREE.Face3(numVertices, numVertices+1, numVertices+2);
-            f1.vertexColors.push(geometry.colors[numVertices]);
-            f1.vertexColors.push(geometry.colors[numVertices + 1]);
-            f1.vertexColors.push(geometry.colors[numVertices + 2]);
+            f1.vertexColors.push(topRightC);
+            f1.vertexColors.push(botRightC);
+            f1.vertexColors.push(botLeftC);
 
             geometry.faces.push( f1 );
 
             /* push face for upper-left triangle */
             var f2 = new THREE.Face3(numVertices+3, numVertices+4, numVertices+5 );
-            f2.vertexColors.push(geometry.colors[numVertices + 3]);
-            f2.vertexColors.push(geometry.colors[numVertices + 4]);
-            f2.vertexColors.push(geometry.colors[numVertices + 5]);
+            f2.vertexColors.push(topLeftC);
+            f2.vertexColors.push(topRightC);
+            f2.vertexColors.push(botLeftC);
             geometry.faces.push( f2 );
 
             /* update the number of vertices that we have added once faces have been created */
             numVertices += 6;
         }
     }
+
     var after = Date.now();
-    console.log(after-before);
+    console.log("Time to create vertices:" + (after-before));
 
     /* remove duplicate vertices and update faces.  Better performance? */
-    geometry.mergeVertices(geometry);
-    
+    before = Date.now();
+    //geometry.mergeVertices(geometry);
+    after = Date.now();
+    console.log("Time to merge vertices:" + (after-before));
+
     /* compute face normals so we can do lighting */
+    before = Date.now();
     geometry.computeFaceNormals();
+    after = Date.now();
+    console.log("Time to compute face normals:" + (after-before));
 
     return geometry;
-}
-
-
-
-
-function waterLevel(height){
-
-    if(height < 0)
-    {
-        return height;
-    }
-    return height;
 }
 
 // only have one copy of each color for speed and memory optimization
@@ -107,8 +162,8 @@ function getWaterColor(depth)
             WATER_COLORS[WATER_COLORS.length] = color;
         }
     }
-    
-    depth = Math.floor((Math.min((depth * -1), 70) / 70) * 19);
+
+    depth = Math.floor((Math.min(-depth, 70) / 70) * 19);
     return WATER_COLORS[depth];
 }
 
@@ -130,6 +185,10 @@ function getColor(height)
     return STONE_COLOR;
 }
 
+<<<<<<< HEAD
+=======
+var pauseSun = false;
+>>>>>>> 762c5dd55cb3e5a78945e4fbe71d5daf41b2a68e
 
 /* --Render-- */
 function createScene(geometry, size) {
@@ -137,54 +196,46 @@ function createScene(geometry, size) {
     var scene = new THREE.Scene();
 
     /* create a camera looking at origin */
-      camera = new THREE.PerspectiveCamera( 45, 1.5, 0.1, 1000 );
-      camera.position.x = 1;
-      camera.position.y = 1;
-      camera.position.z = 1;
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    camera = new THREE.PerspectiveCamera( 45, 1.5, 0.1, 1000 );
+    camera.position.x = 1;
+    camera.position.y = 1;
+    camera.position.z = 1;
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-      /* create a renderer for the canvas */
-      var ourCanvas = document.getElementById('theCanvas');
-      var renderer = new THREE.WebGLRenderer({canvas: ourCanvas});
+    /* create a renderer for the canvas */
+    var ourCanvas = document.getElementById('theCanvas');
+    var renderer = new THREE.WebGLRenderer({canvas: ourCanvas});
 
     /* create a mesh from geometry object */
     var material = new THREE.MeshPhongMaterial(
-        {
-            vertexColors: THREE.VertexColors,
-            wireframe: false,
-            specular: 0x888888,
-            shininess: 1
-        });
+    {
+        vertexColors: THREE.VertexColors,
+        wireframe: false,
+        specular: 0x888888,
+        shininess: 1
+    });
     var terrain = new THREE.Mesh(geometry, material);
     var scale =  1 / size;
     terrain.scale.set(scale, scale, scale);
     terrain.position.set(-0.5, 0, -0.5);
-
-
 
     // Create Water
     geometry = new THREE.PlaneGeometry(1,1);
     geometry.translate(0, 0, 0);
     geometry.rotateX(Math.PI / 2);
     material = new THREE.MeshBasicMaterial(
-        {
-            transparent: true,
-            opacity: 0.4,
-            color: 0x0077be,
-            side: THREE.DoubleSide
-        });
+    {
+        transparent: true,
+        opacity: 0.4,
+        color: 0x0077be,
+        side: THREE.DoubleSide
+    });
     var water = new THREE.Mesh(geometry, material);
-    //water.position.set(-.5, 0, -.5);
-
-
 
     /* create lights */
-    //var lights = new THREE.Group();
-
     // The "sun"  This is just a random light add more take this one out, It doesn't matter
-      var sun = new THREE.DirectionalLight(0x888888, 1.5);
-      sun.position.set(-0.4, 1, -0.2);
-      //lights.add( sun );
+    var sun = new THREE.DirectionalLight(0x888888, 1.5);
+    sun.position.set(-0.4, 1, -0.2);
 
     var ambient = new THREE.AmbientLight(0x323232);
 
@@ -206,34 +257,22 @@ function createScene(geometry, size) {
         sun.position.set(0, yPos, Math.cos(x));
 
         // rotate make night go much faster than day
-        x+= (yPos > -0.1) ? 0.015 : 0.1;
-      };
+        if (!pauseSun)
+        {
+            x+= (yPos > -0.1) ? 0.015 : 0.1;
+        }
+    };
 
-      render();
+    render();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* Controls */
 
 function handleKeyPress(event)
 {
-      var ch = getChar(event);
+    var ch = getChar(event);
     if (cameraControl(camera, ch)) return;
 }
-
 
 function getChar(event) {
     if (event.which == null) {
@@ -251,8 +290,11 @@ function cameraControl(c, ch)
     var q, q2;
 
     switch (ch)
-      {
+    {
         /* movement in plane */
+        case ' ':
+            pauseSun = !pauseSun;
+            return true;
         case 'w':
             c.translateZ(-0.1);
             return true;
@@ -354,4 +396,3 @@ function cameraControl(c, ch)
     }
     return false;
 }
-

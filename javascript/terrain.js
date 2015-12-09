@@ -57,10 +57,6 @@ function variedAverage (grid, variation_scale, values)
     return avg + (random * variation_scale * height_scale);
 }
 
-
-
-
-
 /* Recursively generate height values for 2D terrain array
 
     Grid side length must be of the sequence 2, 3, 5, 9, 17, 33, 65 ...
@@ -134,7 +130,6 @@ function generateHeights (bottom_left, side_length, scale, grid)
     return grid;
 };
 
-
 /* prevent sharp edges by defining heights bredth first */
 function BFHeights(start, grid_length, scale, grid, steps)
 {
@@ -205,22 +200,20 @@ function calcGridSize(steps)
 function createDoubleArr(gridSize)
 {
     var grid = new Array(gridSize);
-        
+
     for(var i = 0; i < gridSize; i++)
     {
         grid[i] = new Array(gridSize)
     }
-    
-    return grid;
-        
-}
 
+    return grid;
+}
 
 function createGrid(steps, gridSize, neighbors, preGrid)
 {
     var start = new Coordinate(0, 0);
     var grid = createDoubleArr(gridSize);
-    
+
     if (!preGrid){
         if (neighbors)
         {
@@ -229,13 +222,13 @@ function createGrid(steps, gridSize, neighbors, preGrid)
                 // if the east neighbor exists, make the east border match the neighbor's west
                 grid[gridSize-1] = neighbors.east[0];
             }
-    
+
             if (neighbors.west)
             {
                 // if the west neighbor exists, make the west border match the neighbor's east
                 grid[0] = neighbors.west[gridSize-1];
             }
-    
+
             if (neighbors.north)
             {
                 // if the north neighbor exists, make the north border match the neighbor's south
@@ -244,7 +237,7 @@ function createGrid(steps, gridSize, neighbors, preGrid)
                     grid[i][gridSize-1] = neighbors.north[i][0];
                 }
             }
-    
+
             if (neighbors.south)
             {
                 // if the south neighbor exists, make the south border match the neighbor's north
@@ -254,7 +247,7 @@ function createGrid(steps, gridSize, neighbors, preGrid)
                 }
             }
         }
-    
+
         // set the corners that are still not set yet
         /* Assign inital corner values. Should be randomly generated */
         grid[0][0]                      = grid[0][0]                    || randomNormal(10, gridSize/4);
@@ -271,17 +264,14 @@ function createGrid(steps, gridSize, neighbors, preGrid)
             }
         }
     }
-    
+
+    var before = Date.now();
     /* 2.5 = maxHeight / 4 */
     BFHeights (start, (gridSize - 1), gridSize / 2, grid, steps);
+    var after = Date.now();
+    console.log("Time to generate heights:" + (after-before));
 
     //gridToConsole(grid);
 
     return grid;
 }
-
-
-
-
-
-
