@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Landscape Generation</title>
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+        
         <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
         <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     </head>
@@ -10,24 +10,24 @@
             <canvas id="theCanvas" width="900" height="600">
                 Please use a browser that supports "canvas"
             </canvas>
+            
             <div class="controls">
+                
                 <form action="" method="get" id="terrainControls">
 
-                    <label for="seed">Seed</label>
+                    <label for="seed"><strong>Seed:</strong> 0 for random</label>
                     <input type="text" id="seed" name="seed" value="0">
 
-                    <label for="smoothness">Smoothness</label>
+                    <label for="smoothness"><strong>Smoothness:</strong> higher values gives smoother landscapes</label>
                     <input type="range" name="smoothness" id="smoothness" value="1.8" min="1.0" max="2.5" step=".05">
 
-                    <label for="detail_level">Detail Level</label>
-
+                    <label for="detail_level"><strong>Detail Level:</strong> more detail takes more memory and more time</label>
                     <input type="range" name="detail_level" id="detail_level" value="8" min="2" max="12">
 
-
-                    <label for="grids_per_side">Stitched Grids per Side</label>
+                    <label for="grids_per_side"><strong>Stitched Grids per Side:</strong> more stitched grids takes more memory and more time (however less of a factor than detail level)</label>
                     <input type="range" name="grids_per_side" id="grids_per_side" value="3" min="0" max="10">
 
-                    <input type="submit" value="submit">
+                    <input type="submit" value="Generate">
                 </form>
             </div>
             <div>
@@ -42,10 +42,9 @@
     </body>
     <script src ="javascript/threejs/three.min.js"></script>
     <script src ="javascript/main.js"></script>
-    <script src ="javascript/coordinate.js"></script>
     <script src ="javascript/randomNormal.js"></script>
     <script src ="javascript/terrain.js"></script>
     <script src ="javascript/graphics.js"></script>
     <script src ="javascript/controls.js"></script>
-    <script>window.onload = main</script>
+    <script>window.onload = main()</script>
 </html>
