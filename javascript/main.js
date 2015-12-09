@@ -1,12 +1,5 @@
 var SEED = 0;
 
-// coordinate object used in terrain generation
-var coordinate = function(x, y)
-{
-	this.x = x;
-	this.y = y;
-}
-
 // submit form and reload controls {method = get}
 $("#terrainControls").submit(function()
 {
