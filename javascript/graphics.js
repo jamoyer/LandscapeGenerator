@@ -131,8 +131,6 @@ function getColor(height)
 }
 
 
-
-
 /* --Render-- */
 function createScene(geometry, size) {
     /* create the scene object */

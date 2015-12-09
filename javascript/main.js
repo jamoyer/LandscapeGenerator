@@ -62,11 +62,29 @@ function main()
    var gridSize = calcGridSize(detail);
 
     if (numGridsSquared == 0){
-
+        /*
         var preGrid = [
             [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)],
             [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)]
         ];
+        */
+        var preGrid = [
+            [1,0.92,0.7,0.601,0.5],
+            [0.71,0.8,0.81,0.47,0.19],
+            [0.55,0.64,0.9,0.39,-0.1],
+            [0.275,0.3,0.25,0.05,-0.33],
+            [0,-0.11,-0.2,-0.35,-0.5]
+        ]
+     
+        for(var i = 0; i < preGrid.length; i++)
+        {
+            for (var j = 0; j < preGrid.length; j++)
+            {
+                preGrid[i][j] *= 3;
+            }
+        }
+
+        
 
         masterGrid = createGrid(detail, gridSize, null, preGrid);
     }else{
