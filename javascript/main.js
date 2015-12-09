@@ -1,5 +1,13 @@
 var SEED = 0;
 
+// coordinate object used in terrain generation
+var coordinate = function(x, y)
+{
+	this.x = x;
+	this.y = y;
+}
+
+// submit form and reload controls {method = get}
 $("#terrainControls").submit(function()
 {
     this.submit();
@@ -7,6 +15,7 @@ $("#terrainControls").submit(function()
 });
 
 
+/* get parameters for terrain from url */
 function getUrlParams()
 {
     // parse the url parameters
@@ -29,11 +38,13 @@ function getUrlParams()
 }
 
 
+/* enter here on page reload */
 function main()
 {
     var mainBefore = Date.now();
     window.onkeypress = handleKeyPress;
 
+    // put all values from url into the form on html
     var urlParams = getUrlParams();
     if (urlParams.seed){
         document.getElementById("seed").value = urlParams.seed;
@@ -62,38 +73,25 @@ function main()
     var masterGrid;
     var gridSize = calcGridSize(detail);
 
-    if (numGridsSquared == 0){
-        /*
+    // if no grids are to be stitched together then use a preGrid from user input
+    // TODO: user input for pregrid from google sheets
+    if (numGridsSquared == 0)
+    {   
         var preGrid = [
             [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)],
             [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)]
         ];
-        */
-        var preGrid = [
-            [1,0.92,0.7,0.601,0.5],
-            [0.71,0.8,0.81,0.47,0.19],
-            [0.55,0.64,0.9,0.39,-0.1],
-            [0.275,0.3,0.25,0.05,-0.33],
-            [0,-0.11,-0.2,-0.35,-0.5]
-        ]
-     
-        for(var i = 0; i < preGrid.length; i++)
-        {
-            for (var j = 0; j < preGrid.length; j++)
-            {
-                preGrid[i][j] *= 3;
-            }
-        }
-
-        
-
         masterGrid = createGrid(detail, gridSize, null, preGrid);
+        
     }else{
+        
         // create many grids to make the landscape more interesting
         var grids = [];
-        for (var i=0; i<numGridsSquared; i++){
+        for (var i=0; i<numGridsSquared; i++)
+        {
             grids[i] = [];
-            for (var j=0; j<numGridsSquared; j++){
+            for (var j=0; j<numGridsSquared; j++)
+            {
                 // create neighbors, only south and west will exist due to the
                 // order these are being created.
                 var neighbors = {
@@ -108,14 +106,10 @@ function main()
         masterGrid = [];
         for (var i=0; i<numGridsSquared; i++)
         {
-            var offset = i * gridSize;
             for (var j=0; j<gridSize; j++)
             {
                 // each grid's edges are equal to their neighbors so skip it
-                if (j == gridSize-1 && i != numGridsSquared-1)
-                {
-                    continue;
-                }
+                if (j == gridSize-1 && i != numGridsSquared-1)  {   continue;   }
 
                 var mgIndex = masterGrid.length;
                 masterGrid[mgIndex] = grids[i][0][j].slice(0, -1);

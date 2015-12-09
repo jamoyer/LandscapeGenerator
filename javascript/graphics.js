@@ -27,10 +27,10 @@ function prepareData(grid) {
             var botLeft  = null;
 
             // colors
-            var topRightC = null;
-            var topLeftC  = null;
-            var botRightC = null;
-            var botLeftC  = null;
+            var topRightColor = null;
+            var topLeftColor  = null;
+            var botRightColor = null;
+            var botLeftColor  = null;
 
             /*
              * Values are stored as chunks into the array like so:
@@ -44,9 +44,9 @@ function prepareData(grid) {
                 var botLeftInd  = index - 3; // lower square's top left
                 var botRightInd = index - 2; // lower square's top right
                 botLeft   = geometry.vertices[botLeftInd];
-                botLeftC  = geometry.colors[botLeftInd];
+                botLeftColor  = geometry.colors[botLeftInd];
                 botRight  = geometry.vertices[botRightInd];
-                botRightC = geometry.colors[botRightInd];
+                botRightColor = geometry.colors[botRightInd];
             }
             if (x > 0)
             {
@@ -54,66 +54,67 @@ function prepareData(grid) {
                 var topLeftInd = index - (6 * (gridSize - 1)); // left square's top right
                 var botLeftInd = topLeftInd + 1;               // left square's bottom right
                 botLeft  = botLeft  || geometry.vertices[botLeftInd];
-                botLeftC = botLeftC || geometry.colors[botLeftInd];
+                botLeftColor = botLeftColor || geometry.colors[botLeftInd];
                 topLeft  = geometry.vertices[topLeftInd];
-                topLeftC = geometry.colors[topLeftInd];
+                topLeftColor = geometry.colors[topLeftInd];
             }
 
             // get heights
-            var topRightH = grid[xplus][zplus];
-            var topLeftH  = grid[x][zplus];
-            var botRightH = grid[xplus][z];
-            var botLeftH  = grid[x][z];
+            var topRightHeight = grid[xplus][zplus];
+            var topLeftHeight  = grid[x][zplus];
+            var botRightHeight = grid[xplus][z];
+            var botLeftHeight  = grid[x][z];
 
             // these values always must be created each iteration
-            topRight  = new THREE.Vector3(xplus, topRightH, zplus);
-            topRightC = getColor(topRightH);
+            topRight  = new THREE.Vector3(xplus, topRightHeight, zplus);
+            topRightColor = getColor(topRightHeight);
 
             // these values must be created if they weren't before, use short circuit style
-            topLeft   = topLeft   || new THREE.Vector3(x, topLeftH, zplus);
-            topLeftC  = topLeftC  || getColor(topLeftH);
+            topLeft   = topLeft   || new THREE.Vector3(x, topLeftHeight, zplus);
+            topLeftColor  = topLeftColor  || getColor(topLeftHeight);
 
-            botRight  = botRight  || new THREE.Vector3(xplus, botRightH, z);
-            botRightC = botRightC || getColor(botRightH);
+            botRight  = botRight  || new THREE.Vector3(xplus, botRightHeight, z);
+            botRightColor = botRightColor || getColor(botRightHeight);
 
-            botLeft   = botLeft   || new THREE.Vector3(x, botLeftH, z);
-            botLeftC  = botLeftC  || getColor(botLeftH);
+            botLeft   = botLeft   || new THREE.Vector3(x, botLeftHeight, z);
+            botLeftColor  = botLeftColor  || getColor(botLeftHeight);
+
 
             /* add vertices for the lower-right triangle */
             geometry.vertices[index]=topRight;
-            geometry.colors[index++]=topRightC;
+            geometry.colors[index++]=topRightColor;
 
             geometry.vertices[index]=botRight;
-            geometry.colors[index++]=botRightC;
+            geometry.colors[index++]=botRightColor;
 
             geometry.vertices[index]=botLeft;
-            geometry.colors[index++]=botLeftC;
+            geometry.colors[index++]=botLeftColor;
+
 
             /* add vertices for the upper-left triangle [pretty sure we need CCW coordinate order] */
-
             geometry.vertices[index]=topLeft;
-            geometry.colors[index++]=topLeftC;
+            geometry.colors[index++]=topLeftColor;
 
             geometry.vertices[index]=topRight;
-            geometry.colors[index++]=topRightC;
+            geometry.colors[index++]=topRightColor;
 
             geometry.vertices[index]=botLeft;
-            geometry.colors[index++]=botLeftC;
+            geometry.colors[index++]=botLeftColor;
+
 
             /* push face for lower-right triangle */
-            var f1 = new THREE.Face3(numVertices, numVertices+1, numVertices+2);
-            f1.vertexColors.push(topRightC);
-            f1.vertexColors.push(botRightC);
-            f1.vertexColors.push(botLeftC);
-
-            geometry.faces.push( f1 );
+            var face1 = new THREE.Face3(numVertices, numVertices+1, numVertices+2);
+            face1.vertexColors.push(topRightColor);
+            face1.vertexColors.push(botRightColor);
+            face1.vertexColors.push(botLeftColor);
+            geometry.faces.push( face1 );
 
             /* push face for upper-left triangle */
-            var f2 = new THREE.Face3(numVertices+3, numVertices+4, numVertices+5 );
-            f2.vertexColors.push(topLeftC);
-            f2.vertexColors.push(topRightC);
-            f2.vertexColors.push(botLeftC);
-            geometry.faces.push( f2 );
+            var face2 = new THREE.Face3(numVertices+3, numVertices+4, numVertices+5 );
+            face2.vertexColors.push(topLeftColor);
+            face2.vertexColors.push(topRightColor);
+            face2.vertexColors.push(botLeftColor);
+            geometry.faces.push( face2 );
 
             /* update the number of vertices that we have added once faces have been created */
             numVertices += 6;
@@ -125,7 +126,7 @@ function prepareData(grid) {
 
     /* remove duplicate vertices and update faces.  Better performance? */
     before = Date.now();
-    //geometry.mergeVertices(geometry);
+   // geometry.mergeVertices(geometry);
     after = Date.now();
     console.log("Time to merge vertices:" + (after-before));
 
@@ -185,10 +186,8 @@ function getColor(height)
     return STONE_COLOR;
 }
 
-<<<<<<< HEAD
-=======
+
 var pauseSun = false;
->>>>>>> 762c5dd55cb3e5a78945e4fbe71d5daf41b2a68e
 
 /* --Render-- */
 function createScene(geometry, size) {
