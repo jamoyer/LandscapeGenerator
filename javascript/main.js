@@ -1,54 +1,49 @@
 var SEED = 0;
 
 // submit form and reload controls {method = get}
-$("#terrainControls").submit(function()
-{
+$("#terrainControls").submit(function() {
     this.submit();
-    location.reload();    
+    location.reload();
 });
 
-
 /* get parameters for terrain from url */
-function getUrlParams()
-{
+function getUrlParams() {
     // parse the url parameters
     var urlParams; // url params will be inside this object
-    (window.onpopstate = function () {
+    (window.onpopstate = function() {
         var match,
-        pl     = /\+/g,  // Regex for replacing addition symbol with a space
-        search = /([^&=]+)=?([^&]*)/g,
-        decode = function (s) {
-            return decodeURIComponent(s.replace(pl, " "));
-        },
-        query  = window.location.search.substring(1);
+            pl = /\+/g, // Regex for replacing addition symbol with a space
+            search = /([^&=]+)=?([^&]*)/g,
+            decode = function(s) {
+                return decodeURIComponent(s.replace(pl, " "));
+            },
+            query = window.location.search.substring(1);
 
         urlParams = {};
-        while (match = search.exec(query)){
+        while (match = search.exec(query)) {
             urlParams[decode(match[1])] = decode(match[2]);
         }
     })();
     return urlParams;
 }
 
-
 /* enter here on page reload */
-function main()
-{
+function main() {
     var mainBefore = Date.now();
     window.onkeypress = handleKeyPress;
 
     // put all values from url into the form on html
     var urlParams = getUrlParams();
-    if (urlParams.seed){
+    if (urlParams.seed) {
         document.getElementById("seed").value = urlParams.seed;
     }
-    if (urlParams.smoothness){
+    if (urlParams.smoothness) {
         document.getElementById("smoothness").value = urlParams.smoothness;
     }
-    if (urlParams.detail_level){
+    if (urlParams.detail_level) {
         document.getElementById("detail_level").value = urlParams.detail_level;
     }
-    if (urlParams.grids_per_side){
+    if (urlParams.grids_per_side) {
         document.getElementById("grids_per_side").value = urlParams.grids_per_side;
     }
 
@@ -59,8 +54,8 @@ function main()
     H = document.getElementById("smoothness").value;
     /* level of detail 9 reasonably well*/
     var detail = document.getElementById("detail_level").value;
-	/* number of grids stitched together (side length) */
-	var numGridsSquared = document.getElementById("grids_per_side").value;
+    /* number of grids stitched together (side length) */
+    var numGridsSquared = document.getElementById("grids_per_side").value;
 
     var before = Date.now();
     var masterGrid;
@@ -68,28 +63,25 @@ function main()
 
     // if no grids are to be stitched together then use a preGrid from user input
     // TODO: user input for pregrid from google sheets
-    if (numGridsSquared == 0)
-    {   
+    if (numGridsSquared == 0) {
         var preGrid = [
-            [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)],
-            [randomNormal(10, gridSize/4), randomNormal(10, gridSize/4)]
+            [randomNormal(10, gridSize / 4), randomNormal(10, gridSize / 4)],
+            [randomNormal(10, gridSize / 4), randomNormal(10, gridSize / 4)]
         ];
         masterGrid = createGrid(detail, gridSize, null, preGrid);
-        
-    }else{
-        
+
+    } else {
+
         // create many grids to make the landscape more interesting
         var grids = [];
-        for (var i=0; i<numGridsSquared; i++)
-        {
+        for (var i = 0; i < numGridsSquared; i++) {
             grids[i] = [];
-            for (var j=0; j<numGridsSquared; j++)
-            {
+            for (var j = 0; j < numGridsSquared; j++) {
                 // create neighbors, only south and west will exist due to the
                 // order these are being created.
                 var neighbors = {
-                    south : (j-1 >= 0) ? grids[i][j-1] : null,  // the condition is to not go out of bounds on the array
-                    west  : (i-1 >= 0) ? grids[i-1][j] : null   // the condition is to not go out of bounds on the array
+                    south: (j - 1 >= 0) ? grids[i][j - 1] : null, // the condition is to not go out of bounds on the array
+                    west: (i - 1 >= 0) ? grids[i - 1][j] : null // the condition is to not go out of bounds on the array
                 };
                 grids[i][j] = createGrid(detail, gridSize, neighbors, null);
             }
@@ -97,19 +89,18 @@ function main()
 
         // put all the grids together into the master grid
         masterGrid = [];
-        for (var i=0; i<numGridsSquared; i++)
-        {
-            for (var j=0; j<gridSize; j++)
-            {
+        for (var i = 0; i < numGridsSquared; i++) {
+            for (var j = 0; j < gridSize; j++) {
                 // each grid's edges are equal to their neighbors so skip it
-                if (j == gridSize-1 && i != numGridsSquared-1)  {   continue;   }
+                if (j == gridSize - 1 && i != numGridsSquared - 1) {
+                    continue;
+                }
 
                 var mgIndex = masterGrid.length;
                 masterGrid[mgIndex] = grids[i][0][j].slice(0, -1);
-                for (var k=1; k<numGridsSquared; k++)
-                {
+                for (var k = 1; k < numGridsSquared; k++) {
                     // dont add the last bit of each strip because the borders of each edge are the same
-                    var stripToAdd = (k != numGridsSquared-1) ? grids[i][k][j].slice(0, -1) : grids[i][k][j];
+                    var stripToAdd = (k != numGridsSquared - 1) ? grids[i][k][j].slice(0, -1) : grids[i][k][j];
                     masterGrid[mgIndex] = masterGrid[mgIndex].concat(stripToAdd);
                 }
             }
@@ -117,20 +108,20 @@ function main()
     }
 
     var after = Date.now();
-    console.log("Time to create Master Grid:" + (after-before));
+    console.log("Time to create Master Grid:" + (after - before));
 
     // prepare data for use by Three.js
     before = Date.now();
     var geometry = prepareData(masterGrid);
     after = Date.now();
-    console.log("Time to prepare geometry:" + (after-before));
+    console.log("Time to prepare geometry:" + (after - before));
 
     // render!
     before = Date.now();
     createScene(geometry, masterGrid.length);
     after = Date.now();
-    console.log("Time to render:" + (after-before));
+    console.log("Time to render:" + (after - before));
 
     var mainAfter = Date.now();
-    console.log("Time to run main:" + (mainAfter-mainBefore));
+    console.log("Time to run main:" + (mainAfter - mainBefore));
 }

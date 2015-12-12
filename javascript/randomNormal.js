@@ -1,9 +1,4 @@
 /* -------------------------------------------------------------------------
- * This is a Java library for random number generation.  The use of this
- * library is recommended as a replacement for the Java class Random,
- * particularly in simulation applications where the statistical
- * 'goodness' of the random number generator is important.
- *
  * The generator used in this library is a so-called 'Lehmer random number
  * generator' which returns a pseudo-random number uniformly distributed
  * between 0.0 and 1.0.  The period is (m - 1) where m = 2,147,483,647 and
@@ -25,30 +20,26 @@
  * Language          : Java
  * Latest Revision   : 6-10-04
  *
- * Program rng       : Section 2.2
+ * Translated by Jacob Moyer to JavaScript.
  * -------------------------------------------------------------------------
  */
-
-var MODULUS = 2147483647; // DON'T CHANGE THIS VALUE
+const MODULUS = 2147483647; // DON'T CHANGE THIS VALUE
 function Rng(seed) {
     // Rng is either seeded with something or use the current time
     // Mod time by MODULUS to make sure it doesnt go over
-    if (seed > 0)
-    {
+    if (seed > 0) {
         this.seed = seed;
-    }
-    else
-    {
+    } else {
         this.seed = Math.max(Date.now() % MODULUS, 1);
         document.getElementById("seed").value = this.seed;
     }
 
-    console.log("Seed:"+this.seed);
+    console.log("Seed:" + this.seed);
 }
 
-Rng.prototype.MODULUS      = MODULUS;
-Rng.prototype.MULTIPLIER   = 48271;     /* use 16807 for the "minimal standard"      */
-Rng.prototype.CHECK        = 399268537; /* use 1043616065 for the "minimal standard" */
+Rng.prototype.MODULUS = MODULUS;
+Rng.prototype.MULTIPLIER = 48271; /* use 16807 for the "minimal standard"      */
+Rng.prototype.CHECK = 399268537; /* use 1043616065 for the "minimal standard" */
 
 /* ---------------------------------------------------------------------
  * Random is a Lehmer generator that returns a pseudo-random real number
@@ -62,12 +53,9 @@ Rng.prototype.random = function() {
     var R = this.MODULUS % this.MULTIPLIER;
 
     var t = this.MULTIPLIER * (this.seed % Q) - R * Math.floor(this.seed / Q);
-    if (t > 0)
-    {
+    if (t > 0) {
         this.seed = t;
-    }
-    else
-    {
+    } else {
         this.seed = t + this.MODULUS;
     }
     return this.seed * 1.0 / this.MODULUS;
@@ -78,17 +66,13 @@ Rng.prototype.random = function() {
  * -------------------------------------------------------------------
  */
 Rng.prototype.testRandom = function() {
-    this.seed = 1;    /* set initial state to 1 */
-    for(var i = 0; i < 10000; i++)
-    {
+    this.seed = 1; /* set initial state to 1 */
+    for (var i = 0; i < 10000; i++) {
         this.random();
     }
-    if (this.seed == this.CHECK)
-    {
+    if (this.seed == this.CHECK) {
         console.log("\n The implementation of Random is correct");
-    }
-    else
-    {
+    } else {
         console.log("\n ERROR - the implementation of Random is not correct");
     }
 }
@@ -115,25 +99,19 @@ const Q1 = 0.588581570495;
 const Q2 = 0.531103462366;
 const Q3 = 0.103537752850;
 const Q4 = 0.385607006340e-2;
-function randomNormal(mean, stndev)
-{
+
+function randomNormal(mean, stndev) {
     var u = RNG_INSTANCE.random();
-    if (u < 0.5)
-    {
+    if (u < 0.5) {
         var t = Math.sqrt(-2.0 * Math.log(u));
-    }
-    else
-    {
+    } else {
         var t = Math.sqrt(-2.0 * Math.log(1.0 - u));
     }
-    var p   = P0 + t * (P1 + t * (P2 + t * (P3 + t * P4)));
-    var q   = Q0 + t * (Q1 + t * (Q2 + t * (Q3 + t * Q4)));
-    if (u < 0.5)
-    {
+    var p = P0 + t * (P1 + t * (P2 + t * (P3 + t * P4)));
+    var q = Q0 + t * (Q1 + t * (Q2 + t * (Q3 + t * Q4)));
+    if (u < 0.5) {
         var z = p / q - t;
-    }
-    else
-    {
+    } else {
         var z = t - p / q;
     }
 
