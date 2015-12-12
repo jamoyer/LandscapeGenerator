@@ -1,10 +1,10 @@
 var SEED = 0;
 
 // submit form and reload controls {method = get}
-$("#terrainControls").submit(function() {
+document.getElementById("terrainControls").submit = function(){
     this.submit();
     location.reload();
-});
+};
 
 /* get parameters for terrain from url */
 function getUrlParams() {
@@ -52,10 +52,24 @@ function main() {
 
     /* smoothness constant */
     H = document.getElementById("smoothness").value;
+    document.getElementById("smoothnessLabel").innerHTML = document.getElementById("smoothness").value;
     /* level of detail 9 reasonably well*/
     var detail = document.getElementById("detail_level").value;
+    document.getElementById("detailLabel").innerHTML = document.getElementById("detail_level").value;
     /* number of grids stitched together (side length) */
     var numGridsSquared = document.getElementById("grids_per_side").value;
+    document.getElementById("gridsLabel").innerHTML = document.getElementById("grids_per_side").value;
+
+    // create labels that display the value of the sliders
+    function setOnChangeDisplay(inputId, labelId) {
+        document.getElementById(inputId).onchange = function(){
+            document.getElementById(labelId).innerHTML = this.value;
+        };
+    }
+    setOnChangeDisplay("smoothness", "smoothnessLabel");
+    setOnChangeDisplay("detail_level", "detailLabel");
+    setOnChangeDisplay("grids_per_side", "gridsLabel");
+
 
     var before = Date.now();
     var masterGrid;
